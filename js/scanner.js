@@ -1,10 +1,10 @@
 (function(){
-const LIVE_ANGLES=[0,-18,18,0,-35,35];
-const STATIC_ANGLES=[0,-18,18,-35,35];
-const LIVE_MAX_DIM=1050;
-const STATIC_MAX_DIM=1600;
-const TRACK_TTL_MS=6500;
-const TRACK_RESET_MS=12000;
+const LIVE_ANGLES=[0,-22,22];
+const STATIC_ANGLES=[0,-22,22,-36,36];
+const LIVE_TILE_MAX_DIM=1250;
+const STATIC_TILE_MAX_DIM=1550;
+const TRACK_TTL_MS=8500;
+const TRACK_RESET_MS=15000;
 const ALPHABET="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÁČĎÉĚÍŇÓŘŠŤÚŮÝŽáčďéěíňóřšťúůýž ";
 
 let workerPromise=null;
@@ -121,32 +121,62 @@ async function imageFromBlob(blob){
     setTimeout(function(){URL.revokeObjectURL(url)},0)
   }
 }
-async function canvasFromSource(source,maxDim){
+async function canvasFromSource(source,maxDim,tile){
   var actual=source;
   if(source instanceof Blob)actual=await imageFromBlob(source);
   var dim=sourceDimensions(actual);
   if(!dim||!dim.width||!dim.height)throw new Error("Obrazový vstup zatím nemá platnou velikost.");
 
-  var scale=Math.min(1,maxDim/Math.max(dim.width,dim.height));
+  tile=tile||{x:0,y:0,w:1,h:1,id:"full"};
+  var sx=Math.max(0,Math.round(tile.x*dim.width));
+  var sy=Math.max(0,Math.round(tile.y*dim.height));
+  var sw=Math.min(dim.width-sx,Math.max(1,Math.round(tile.w*dim.width)));
+  var sh=Math.min(dim.height-sy,Math.max(1,Math.round(tile.h*dim.height)));
+
+  var scale=Math.min(2.6,maxDim/Math.max(sw,sh));
   var canvas=document.createElement("canvas");
-  canvas.width=Math.max(1,Math.round(dim.width*scale));
-  canvas.height=Math.max(1,Math.round(dim.height*scale));
+  canvas.width=Math.max(1,Math.round(sw*scale));
+  canvas.height=Math.max(1,Math.round(sh*scale));
   var ctx=canvas.getContext("2d",{alpha:false,willReadFrequently:true});
   ctx.fillStyle="#fff";
   ctx.fillRect(0,0,canvas.width,canvas.height);
   ctx.imageSmoothingEnabled=true;
   ctx.imageSmoothingQuality="high";
-  ctx.drawImage(actual,0,0,canvas.width,canvas.height);
-  return{canvas:canvas,sourceWidth:dim.width,sourceHeight:dim.height}
+  ctx.drawImage(actual,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+  return{
+    canvas:canvas,
+    sourceWidth:dim.width,
+    sourceHeight:dim.height,
+    tile:tile
+  }
 }
+function tilesForSource(source){
+  var dim=sourceDimensions(source);
+  if(!dim&&source instanceof Blob)return null;
+  if(!dim)return[{x:0,y:0,w:1,h:1,id:"full"}];
 
+  // Portrait photos are split horizontally; landscape video vertically.
+  // The 20% overlap prevents a title from being cut at a tile boundary.
+  if(dim.height>=dim.width){
+    return[
+      {x:0,y:0,w:1,h:.46,id:"top"},
+      {x:0,y:.27,w:1,h:.46,id:"middle"},
+      {x:0,y:.54,w:1,h:.46,id:"bottom"}
+    ]
+  }
+  return[
+    {x:0,y:0,w:.46,h:1,id:"left"},
+    {x:.27,y:0,w:.46,h:1,id:"middle"},
+    {x:.54,y:0,w:.46,h:1,id:"right"}
+  ]
+}
 /*
  * Title-only mask.
  * The card title is light lettering on a dark banner. The rules are the inverse:
  * dark lettering on a light panel. We therefore retain only bright pixels that
  * have a sufficiently dark local horizontal/vertical neighbourhood.
  */
-function rotateAndTitleMask(base,degrees){
+function rotateAndTitleMask(base,degrees,tile){
   var bw=base.width,bh=base.height;
   var rad=degrees*Math.PI/180,cos=Math.abs(Math.cos(rad)),sin=Math.abs(Math.sin(rad));
   var w=Math.ceil(bw*cos+bh*sin),h=Math.ceil(bw*sin+bh*cos);
@@ -180,7 +210,7 @@ function rotateAndTitleMask(base,degrees){
     }
   }
   ctx.putImageData(image,0,0);
-  return{canvas:canvas,angle:degrees,baseWidth:bw,baseHeight:bh,width:w,height:h}
+  return{canvas:canvas,angle:degrees,baseWidth:bw,baseHeight:bh,width:w,height:h,tile:tile||{x:0,y:0,w:1,h:1}}
 }
 
 function linesFromBlocks(blocks){
@@ -238,9 +268,17 @@ function bboxToNormalized(bbox,meta){
     inverseRotatePoint(bbox.x0,bbox.y1,meta)
   ];
   var xs=points.map(function(p){return p.x}),ys=points.map(function(p){return p.y});
-  var x0=Math.max(0,Math.min.apply(null,xs)),x1=Math.min(meta.baseWidth,Math.max.apply(null,xs));
-  var y0=Math.max(0,Math.min.apply(null,ys)),y1=Math.min(meta.baseHeight,Math.max.apply(null,ys));
-  return{x0:x0/meta.baseWidth,y0:y0/meta.baseHeight,x1:x1/meta.baseWidth,y1:y1/meta.baseHeight}
+  var tx0=Math.max(0,Math.min.apply(null,xs))/meta.baseWidth;
+  var tx1=Math.min(meta.baseWidth,Math.max.apply(null,xs))/meta.baseWidth;
+  var ty0=Math.max(0,Math.min.apply(null,ys))/meta.baseHeight;
+  var ty1=Math.min(meta.baseHeight,Math.max.apply(null,ys))/meta.baseHeight;
+  var tile=meta.tile||{x:0,y:0,w:1,h:1};
+  return{
+    x0:tile.x+tx0*tile.w,
+    y0:tile.y+ty0*tile.h,
+    x1:tile.x+tx1*tile.w,
+    y1:tile.y+ty1*tile.h
+  }
 }
 function lineLooksLikeTitle(line,meta){
   var n=normalizeText(line.text);
@@ -280,9 +318,9 @@ function detectFromOcr(data,meta){
   });
   return{matched:Object.values(byId),candidates:candidates.sort(function(a,b){return b.score-a.score}).slice(0,8)}
 }
-async function recognizePass(source,angle,maxDim,progressCallback){
-  var baseInfo=await canvasFromSource(source,maxDim);
-  var meta=rotateAndTitleMask(baseInfo.canvas,angle);
+async function recognizePass(source,task,maxDim,progressCallback){
+  var baseInfo=await canvasFromSource(source,maxDim,task.tile);
+  var meta=rotateAndTitleMask(baseInfo.canvas,task.angle,task.tile);
   var worker=await getWorker();
   activeProgress=progressCallback||null;
   try{
@@ -291,12 +329,26 @@ async function recognizePass(source,angle,maxDim,progressCallback){
       blocks:true,
       tsv:true
     });
-    return detectFromOcr(result.data,meta)
+    var detected=detectFromOcr(result.data,meta);
+    detected.matched.forEach(function(item){item.tileId=task.tile.id});
+    detected.candidates.forEach(function(item){item.tileId=task.tile.id});
+    return detected
   }finally{
     activeProgress=null
   }
 }
-
+function tasksForSource(source,angles){
+  var tiles=tilesForSource(source)||[
+    {x:0,y:0,w:1,h:.46,id:"top"},
+    {x:0,y:.27,w:1,h:.46,id:"middle"},
+    {x:0,y:.54,w:1,h:.46,id:"bottom"}
+  ];
+  var tasks=[];
+  angles.forEach(function(angle){
+    tiles.forEach(function(tile){tasks.push({tile:tile,angle:angle})})
+  });
+  return tasks
+}
 function mergeTracks(tracks,detections,now){
   detections.forEach(function(d){
     var old=tracks[d.id];
@@ -331,46 +383,50 @@ function createLiveScanner(video,handlers){
   handlers=handlers||{};
   var running=true;
   var tracks={};
-  var angleIndex=0;
+  var taskIndex=0;
   var passNumber=0;
+  var tasks=[];
 
   async function loop(){
-    var workerReady=false;
     try{
       if(handlers.onStatus)handlers.onStatus({state:"loading",message:"Načítám OCR model…"});
       await getWorker();
-      workerReady=true;
       if(handlers.onStatus)handlers.onStatus({state:"running",message:"Živý scanner běží."})
     }catch(e){
       running=false;
       if(handlers.onError)handlers.onError(e);
       return
     }
-    if(!workerReady)return;
 
     while(running){
       if(!video.videoWidth||video.readyState<2){
         await new Promise(function(resolve){setTimeout(resolve,120)});
         continue
       }
-      var angle=LIVE_ANGLES[angleIndex++%LIVE_ANGLES.length];
+      if(!tasks.length||taskIndex>=tasks.length){
+        tasks=tasksForSource(video,LIVE_ANGLES);
+        taskIndex=0
+      }
+      var task=tasks[taskIndex++];
       var started=performance.now();
       try{
-        var pass=await recognizePass(video,angle,LIVE_MAX_DIM,null);
+        var pass=await recognizePass(video,task,LIVE_TILE_MAX_DIM,null);
+        if(!running)break;
         var now=Date.now();
         mergeTracks(tracks,pass.matched,now);
         passNumber++;
         if(handlers.onUpdate)handlers.onUpdate({
           detections:visibleTracks(tracks,now),
           candidates:pass.candidates,
-          angle:angle,
+          angle:task.angle,
+          tileId:task.tile.id,
           pass:passNumber,
           elapsedMs:Math.round(performance.now()-started)
         })
       }catch(e){
         if(handlers.onError)handlers.onError(e)
       }
-      if(running)await new Promise(function(resolve){setTimeout(resolve,70)})
+      if(running)await new Promise(function(resolve){setTimeout(resolve,50)})
     }
   }
   loop();
@@ -382,21 +438,24 @@ function createLiveScanner(video,handlers){
 }
 
 async function recognize(source,progressCallback){
+  var actual=source;
+  if(source instanceof Blob)actual=await imageFromBlob(source);
+  var tasks=tasksForSource(actual,STATIC_ANGLES);
   var tracks={};
-  var candidates=[];
-  for(var i=0;i<STATIC_ANGLES.length;i++){
-    var angle=STATIC_ANGLES[i];
-    var pass=await recognizePass(source,angle,STATIC_MAX_DIM,function(message){
+
+  for(var i=0;i<tasks.length;i++){
+    var task=tasks[i];
+    var pass=await recognizePass(actual,task,STATIC_TILE_MAX_DIM,function(message){
       if(!progressCallback)return;
       var p=typeof message.progress==="number"?message.progress:0;
       progressCallback({
-        status:"OCR "+(i+1)+"/"+STATIC_ANGLES.length+" · "+angle+"° · "+(message.status||""),
-        progress:(i+p)/STATIC_ANGLES.length
+        status:"OCR "+(i+1)+"/"+tasks.length+" · "+task.tile.id+" · "+task.angle+"°",
+        progress:(i+p)/tasks.length
       })
     });
-    mergeTracks(tracks,pass.matched,Date.now());
-    candidates=candidates.concat(pass.candidates)
+    mergeTracks(tracks,pass.matched,Date.now())
   }
+
   var result=visibleTracks(tracks,Date.now());
   result.forEach(function(item){
     if(!item.confirmed&&item.bestScore>=0.82)item.confirmed=true
