@@ -1,0 +1,19 @@
+{
+  "name": "Tajuplné říše – Remastered",
+  "short_name": "Tajuplné říše",
+  "description": "Fan-made scorer pro 54 karet se skenováním názvů pomocí kamery.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0e0d12",
+  "theme_color": "#16151b",
+  "lang": "cs",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
