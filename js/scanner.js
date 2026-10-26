@@ -195,14 +195,34 @@ function rotateAndTitleMask(base,degrees,tile){
     gray[p]=Math.round(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2])
   }
 
-  var radius=5;
+  // Integral image gives a true local background average. This preserves
+  // whole anti-aliased title glyphs instead of retaining only their edges.
+  var stride=w+1;
+  var integral=new Uint32Array((w+1)*(h+1));
+  for(var iy=0;iy<h;iy++){
+    var rowSum=0;
+    var prevRow=iy*stride;
+    var outRow=(iy+1)*stride;
+    for(var ix=0;ix<w;ix++){
+      rowSum+=gray[iy*w+ix];
+      integral[outRow+ix+1]=integral[prevRow+ix+1]+rowSum
+    }
+  }
+
+  var radius=8;
   for(var y=0;y<h;y++){
+    var y0=Math.max(0,y-radius),y1=Math.min(h-1,y+radius);
     for(var x=0;x<w;x++){
+      var x0=Math.max(0,x-radius),x1=Math.min(w-1,x+radius);
+      var a=y0*stride+x0;
+      var b=y0*stride+x1+1;
+      var c=(y1+1)*stride+x0;
+      var e=(y1+1)*stride+x1+1;
+      var sum=integral[e]-integral[b]-integral[c]+integral[a];
+      var count=(x1-x0+1)*(y1-y0+1);
+      var local=sum/count;
       var p=y*w+x;
-      var xl=Math.max(0,x-radius),xr=Math.min(w-1,x+radius);
-      var yu=Math.max(0,y-radius),yd=Math.min(h-1,y+radius);
-      var local=(gray[y*w+xl]+gray[y*w+xr]+gray[yu*w+x]+gray[yd*w+x])/4;
-      var brightOnDark=gray[p]>162&&local<158&&(gray[p]-local)>18;
+      var brightOnDark=gray[p]>145&&local<155&&(gray[p]-local)>12;
       var v=brightOnDark?0:255;
       var di=p*4;
       d[di]=d[di+1]=d[di+2]=v;
