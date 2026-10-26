@@ -31,14 +31,14 @@
       <div class="panelHead">
         <div>
           <h2>Skenování karet</h2>
-          <p>Namiř kameru na karty tak, aby byly vidět jejich horní názvy. Karty mohou být překryté i natočené – OCR zkouší několik úhlů.</p>
+          <p>Scanner průběžně čte pouze horní titulky karet. Karty mohou být překryté i mírně natočené; potvrzené názvy se automaticky přidají do ruky.</p>
         </div>
         <span class="counter"><b id="handCount">0</b>/<b id="handLimit">7</b></span>
       </div>
 
       <div class="cameraFrame">
         <video id="camera" playsinline muted></video>
-        <canvas id="captureCanvas" hidden></canvas>
+        <canvas id="detectionOverlay" class="detectionOverlay" aria-hidden="true"></canvas>
         <div id="cameraPlaceholder" class="cameraPlaceholder">
           <strong>Kamera je vypnutá</strong>
           <span>Po spuštění prohlížeč požádá o povolení přístupu.</span>
@@ -46,9 +46,8 @@
       </div>
 
       <div class="buttonRow">
-        <button id="startCamera" class="primary">Spustit kameru</button>
-        <button id="capture" disabled>Vyfotit a rozpoznat</button>
-        <button id="stopCamera" disabled>Vypnout kameru</button>
+        <button id="startCamera" class="primary">Spustit živý scanner</button>
+        <button id="stopCamera" disabled>Zastavit scanner</button>
       </div>
 
       <div class="uploadRow">
@@ -57,6 +56,10 @@
       </div>
 
       <div id="ocrStatus" class="status" aria-live="polite"></div>
+      <div class="liveLegend">
+        <span><i class="legendConfirmed"></i> potvrzená karta</span>
+        <span><i class="legendCandidate"></i> kandidát</span>
+      </div>
       <div id="detections" class="detections"></div>
     </section>
 
@@ -84,7 +87,7 @@
 
     <section class="panel infoPanel">
       <h2>Jak skenování funguje</h2>
-      <p>OCR nečte pravidla ani grafiku karty jako zdroj pravdy. Z fotografie hledá pouze velké textové názvy a porovnává je s uzavřeným registrem 54 českých názvů. Po nalezení názvu se použije ID FR01–FR54 a veškeré bodování provede původní engine.</p>
+      <p>Do OCR se předává jen maska světlého textu na tmavém titulkovém pásu. BONUS, POSTIH ani obrázek karty se jako zdroj dat nepoužívají. Rozpoznaný titul se porovná s registrem FR01–FR54 a všechny hodnoty i scoring se načtou interně.</p>
     </section>
   </main>
 
