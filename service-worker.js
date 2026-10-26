@@ -1,0 +1,5 @@
+const CACHE="tajuplne-rise-remastered-v1";
+const ASSETS=["./","./index.html","./css/app.css","./js/deck.js","./js/discard.js","./js/hand.js","./js/cards-cz.js","./js/scanner.js","./js/app.js","./manifest.webmanifest","./icons/icon.svg"];
+self.addEventListener("install",function(event){event.waitUntil(caches.open(CACHE).then(function(cache){return cache.addAll(ASSETS)}));self.skipWaiting()});
+self.addEventListener("activate",function(event){event.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(key){return key!==CACHE}).map(function(key){return caches.delete(key)}))}));self.clients.claim()});
+self.addEventListener("fetch",function(event){if(event.request.method!=="GET")return;event.respondWith(caches.match(event.request).then(function(cached){if(cached)return cached;return fetch(event.request).then(function(response){if(!response||response.status!==200||response.type==="opaque")return response;var copy=response.clone();caches.open(CACHE).then(function(cache){cache.put(event.request,copy)});return response})}))});
