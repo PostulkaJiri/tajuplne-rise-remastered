@@ -4,8 +4,10 @@ Mobilní fan-made scorer pro základní sadu 54 karet (FR01–FR54).
 
 ## MVP
 
-- přímý přístup k zadní kameře mobilu přes HTTPS / GitHub Pages,
-- OCR českých názvů pomocí Tesseract.js,
+- živý scanner zadní kamery přes HTTPS / GitHub Pages,
+- průběžné OCR pouze titulkového textu karet pomocí Tesseract.js,
+- overlay rozpoznaných titulů přímo nad obrazem kamery,
+- automatické přidávání stabilně rozpoznaných karet do ruky a okamžitý přepočet skóre,
 - fuzzy matching pouze proti uzavřenému registru 54 názvů,
 - ruční fallback při chybném rozpoznání,
 - scoring přes původní open-source engine,
@@ -35,7 +37,7 @@ Výsledná adresa bude typicky:
 
 ## OCR
 
-První OCR načte Tesseract.js a český jazykový model z internetu. V další iteraci lze worker i jazyková data uložit přímo do repozitáře pro plně offline režim.
+Po spuštění živého scanneru se jeden OCR worker drží načtený a průběžně zpracovává snímky v několika úhlech. Před OCR se ponechá pouze světlý text na tmavém titulkovém pásu; text BONUS/POSTIH se do rozpoznávání záměrně nepouští.
 
 ## Licence
 
