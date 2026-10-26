@@ -16,8 +16,10 @@ var handCards=document.getElementById("handCards");
 var scoreNode=document.getElementById("score");
 var handCount=document.getElementById("handCount");
 var handLimit=document.getElementById("handLimit");
-var manualCard=document.getElementById("manualCard");
+var manualSearch=document.getElementById("manualSearch");
+var manualResults=document.getElementById("manualResults");
 var manualStatus=document.getElementById("manualStatus");
+var manualMatches=[];
 var actionDialog=document.getElementById("actionDialog");
 var actionTitle=document.getElementById("actionTitle");
 var actionBody=document.getElementById("actionBody");
@@ -195,8 +197,9 @@ upload.addEventListener("change",async function(){var file=upload.files&&upload.
 function renderDetections(){
   if(!lastDetections.length){detections.innerHTML="";return}
   var html=lastDetections.map(function(item,index){
-    var pct=Math.round(item.score*100),checked=item.score>=.76&&index<8?" checked":"";
-    return '<div class="detectCard"><input type="checkbox" id="det-'+index+'" data-detected="'+item.id+'"'+checked+'><label for="det-'+index+'"><strong>'+escapeHtml(item.name)+'</strong><small>'+pct+'%</small></label></div>'
+    var pct=Math.round(item.score*100),checked=(item.score>=.73||item.votes>=2)&&index<8?" checked":"";
+    var votes=item.votes?(" · "+item.votes+"×"):"";
+    return '<div class="detectCard"><input type="checkbox" id="det-'+index+'" data-detected="'+item.id+'"'+checked+'><label for="det-'+index+'"><strong>'+escapeHtml(item.name)+'</strong><small>'+pct+'%'+votes+'</small></label></div>'
   }).join("");
   html+='<div class="detectActions"><button id="addDetected" class="primary">Přidat označené do ruky</button></div>';
   detections.innerHTML=html;
@@ -208,19 +211,57 @@ function renderDetections(){
   })
 }
 
-var datalist=document.getElementById("cardNames");
-datalist.innerHTML=baseIds().map(function(id){return '<option value="'+escapeHtml(registryCard(id).name)+'"></option>'}).join("");
+function renderManualResults(){
+  var q=CardScanner.normalizeText(manualSearch.value);
+  manualMatches=baseIds().map(function(id){
+    var card=registryCard(id);
+    var normalized=CardScanner.normalizeText(card.name);
+    var score=q?CardScanner.similarity(q,card.name):1;
+    var contains=q&&normalized.indexOf(q)>=0;
+    return{id:id,name:card.name,strength:deck.getCardById(id).strength,score:contains?1:score}
+  }).filter(function(item){return !q||item.score>=.42})
+    .sort(function(a,b){return b.score-a.score||a.name.localeCompare(b.name,"cs")});
+
+  if(!manualMatches.length){
+    manualResults.innerHTML='<div class="emptyState">Žádná odpovídající karta.</div>';
+    return
+  }
+  manualResults.innerHTML=manualMatches.map(function(item){
+    return '<button type="button" class="manualResult" data-manual-id="'+item.id+'"><span>'+escapeHtml(item.name)+'</span><small>'+item.strength+'</small></button>'
+  }).join("");
+
+  manualResults.querySelectorAll("[data-manual-id]").forEach(function(el){
+    el.addEventListener("click",function(){
+      var id=el.getAttribute("data-manual-id");
+      manualStatus.textContent="";
+      if(addCard(id)){
+        manualStatus.textContent="Přidána: "+registryCard(id).name;
+        manualSearch.value="";
+        renderManualResults()
+      }
+    })
+  })
+}
+manualSearch.addEventListener("input",renderManualResults);
+manualSearch.addEventListener("focus",renderManualResults);
+manualSearch.addEventListener("keydown",function(e){
+  if(e.key==="Enter"){
+    e.preventDefault();
+    document.getElementById("manualAdd").click()
+  }
+});
 document.getElementById("manualAdd").addEventListener("click",function(){
   manualStatus.textContent="";
-  var value=manualCard.value.trim();
-  if(!value)return;
-  var best=CardScanner.findBest(value);
-  if(!best||best.score<.62){manualStatus.textContent="Takovou kartu v registru nevidím.";return}
-  if(addCard(best.id)){manualCard.value="";manualStatus.textContent="Přidána: "+best.name}
+  if(!manualMatches.length){manualStatus.textContent="Nejdřív vyber nebo vyhledej kartu.";return}
+  var id=manualMatches[0].id;
+  if(addCard(id)){
+    manualStatus.textContent="Přidána: "+registryCard(id).name;
+    manualSearch.value="";
+    renderManualResults()
+  }
 });
-manualCard.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();document.getElementById("manualAdd").click()}});
-document.getElementById("resetHand").addEventListener("click",function(){hand.clear();lastDetections=[];detections.innerHTML="";manualStatus.textContent="";render()});
+document.getElementById("resetHand").addEventListener("click",function(){hand.clear();lastDetections=[];detections.innerHTML="";manualStatus.textContent="";render();renderManualResults()});
 
 if("serviceWorker"in navigator)window.addEventListener("load",function(){navigator.serviceWorker.register("./service-worker.js").catch(function(){})});
-render()
+render();renderManualResults()
 })();
