@@ -31,7 +31,7 @@
       <div class="panelHead">
         <div>
           <h2>Skenování karet</h2>
-          <p>Namiř kameru na karty tak, aby byly všechny názvy čitelné a pokud možno otočené stejným směrem.</p>
+          <p>Namiř kameru na karty tak, aby byly vidět jejich horní názvy. Karty mohou být překryté i natočené – OCR zkouší několik úhlů.</p>
         </div>
         <span class="counter"><b id="handCount">0</b>/<b id="handLimit">7</b></span>
       </div>
@@ -75,10 +75,10 @@
       <h2>Ruční přidání</h2>
       <p>Fallback pro případ, že OCR některou kartu nepřečte.</p>
       <div class="manualAdd">
-        <input id="manualCard" list="cardNames" placeholder="Začni psát název karty…">
-        <datalist id="cardNames"></datalist>
-        <button id="manualAdd">Přidat</button>
+        <input id="manualSearch" type="search" autocomplete="off" placeholder="Hledej název karty…">
+        <button id="manualAdd">Přidat první</button>
       </div>
+      <div id="manualResults" class="manualResults"></div>
       <div id="manualStatus" class="status"></div>
     </section>
 
