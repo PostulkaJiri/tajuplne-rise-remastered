@@ -137,10 +137,22 @@ function rotateAndThreshold(base,degrees){
   ctx.setTransform(1,0,0,1,0,0);
 
   var image=ctx.getImageData(0,0,w,h),d=image.data;
-  for(var i=0;i<d.length;i+=4){
-    var y=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
-    var v=y>THRESHOLD?0:255;
-    d[i]=d[i+1]=d[i+2]=v;d[i+3]=255
+  var gray=new Uint8Array(w*h);
+  for(var i=0,p=0;i<d.length;i+=4,p++){
+    gray[p]=Math.round(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2])
+  }
+  var radius=5;
+  for(var y=0;y<h;y++){
+    for(var x=0;x<w;x++){
+      var p=y*w+x;
+      var xl=Math.max(0,x-radius),xr=Math.min(w-1,x+radius);
+      var yu=Math.max(0,y-radius),yd=Math.min(h-1,y+radius);
+      var local=(gray[y*w+xl]+gray[y*w+xr]+gray[yu*w+x]+gray[yd*w+x])/4;
+      var keep=gray[p]>165&&local<155&&(gray[p]-local)>20;
+      var v=keep?0:255;
+      var di=p*4;
+      d[di]=d[di+1]=d[di+2]=v;d[di+3]=255
+    }
   }
   ctx.putImageData(image,0,0);
   return rotated
