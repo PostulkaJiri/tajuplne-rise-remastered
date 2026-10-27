@@ -225,7 +225,14 @@ class OcrService:
                         if current is None or item["combinedConfidence"] > current["combinedConfidence"]:
                             accepted_by_id[match.card.id] = item
                     else:
-                        candidates.append(item)
+                        # Do not clutter the live overlay with fuzzy matches found
+                        # in the cream rules panel. Candidates still need to look
+                        # at least somewhat like title-band text.
+                        if (
+                            ocr_score >= max(0.20, self.settings.min_ocr_score * 0.65)
+                            and title_style >= self.settings.min_title_style * 0.50
+                        ):
+                            candidates.append(item)
 
         cards = sorted(
             accepted_by_id.values(),
