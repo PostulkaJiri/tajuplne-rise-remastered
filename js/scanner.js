@@ -98,8 +98,11 @@ async function checkHealth(signal){
   if(!response.ok)throw new Error("OCR server není dostupný ("+response.status+").");
   return response.json()
 }
-async function scanBlob(blob,signal,debug){
-  var url=SCAN_URL+(debug?"?debug=true":"");
+async function scanBlob(blob,signal,debug,source,captureId){
+  var params=new URLSearchParams({source:source||"live"});
+  if(debug)params.set("debug","true");
+  if(captureId)params.set("capture_id",captureId);
+  var url=SCAN_URL+"?"+params.toString();
   var response=await fetch(url,{
     method:"POST",
     headers:{"Content-Type":blob.type||"image/jpeg","Cache-Control":"no-store"},
@@ -168,6 +171,7 @@ function createLiveScanner(video,handlers){
       }
       var started=performance.now();
       try{
+        var capturedAt=Date.now();
         var frame=sourceCanvas(video);
         var blob=await canvasToBlob(frame);
         var result=await scanBlob(blob,controller.signal,false);
@@ -176,7 +180,7 @@ function createLiveScanner(video,handlers){
         mergeTracks(tracks,(result.cards||[]).map(toDetection),now);
         pass++;
         if(handlers.onUpdate)handlers.onUpdate({
-          frame:frame,observedAt:now,
+          frame:frame,observedAt:now,capturedAt:capturedAt,capture:result.capture,
           detections:visibleTracks(tracks,now),
           candidates:(result.candidates||[]).map(toCandidate).slice(0,8),
           pass:pass,processingMs:Number(result.processingMs)||0,
@@ -193,17 +197,24 @@ function createLiveScanner(video,handlers){
   loop();
   return{stop:function(){running=false;controller.abort()},isRunning:function(){return running}}
 }
-async function recognize(source,progressCallback){
+async function archivePhoto(file){
+  var type=file.type||(/\.hei[cf]$/i.test(file.name||"")?"image/heic":"image/jpeg");
+  var response=await fetch(API_BASE+"/api/v1/captures",{method:"POST",headers:{"Content-Type":type},body:file,cache:"no-store"});
+  var result=await response.json();
+  if(!response.ok)throw new Error("Fotografii se nepodařilo uložit.");
+  return result
+}
+async function recognize(source,progressCallback,captureId){
   if(progressCallback)progressCallback({status:"Odesílám fotografii na OCR server…",progress:.2});
   var blob=await blobFromSource(source);
-  var result=await scanBlob(blob,undefined,false);
-  if(progressCallback)progressCallback({status:"Zpracováno serverem za "+result.processingMs+" ms",progress:1});
+  var result=await scanBlob(blob,undefined,false,"photo",captureId);
+  if(progressCallback)progressCallback({status:"Zpracováno serverem za "+result.processingMs+" ms",progress:1,capture:result.capture});
   return(result.cards||[]).map(function(item){var d=toDetection(item);d.confirmed=true;return d})
 }
 
 window.CardScanner={
   normalizeText:normalizeText,similarity:similarity,findBest:findBest,
   startCamera:startCamera,stopCamera:stopCamera,
-  createLiveScanner:createLiveScanner,recognize:recognize,checkHealth:checkHealth
+  createLiveScanner:createLiveScanner,recognize:recognize,archivePhoto:archivePhoto,checkHealth:checkHealth
 }
 })();

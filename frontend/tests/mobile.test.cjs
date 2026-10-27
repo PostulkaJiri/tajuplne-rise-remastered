@@ -13,7 +13,7 @@ const server=http.createServer((req,res)=>{
   fs.readFile(actual,(err,data)=>{res.writeHead(err?404:200,{'Content-Type':types[path.extname(actual)]||'application/octet-stream'});res.end(err?'Not found':data)})
 });
 function mockCamera(denied=false){
-  window.__cameraRequests=0;
+  window.__cameraRequests=0;window.__clockOffset=0;const clock=Date.now;Date.now=()=>clock()+window.__clockOffset;
   window.__streams=[];
   const media={getUserMedia:async function(constraints){
     window.__cameraRequests++;window.__cameraConstraints=constraints;
@@ -36,15 +36,17 @@ function mockCamera(denied=false){
   CanvasRenderingContext2D.prototype.drawImage=function(...args){if(args[0] instanceof HTMLVideoElement)window.__videoCrop={args:args.slice(1),width:args[0].videoWidth,height:args[0].videoHeight};return draw.apply(this,args)};
 }
 async function api(context,selected,failHealthOnce=false){
-  let active=0,maximum=0,requests=0,healthRequests=0;
+  let active=0,maximum=0,requests=0,healthRequests=0,originalUploads=0,responseDelay=75;
+  await context.route('**/card-images/*.webp',route=>route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="320" height="454"><rect width="320" height="454" rx="12" fill="#403147" stroke="#d6b574" stroke-width="8"/><text x="32" y="55" fill="white" font-size="26">Celá karta</text><rect x="24" y="90" width="272" height="210" fill="#756342"/><rect x="24" y="325" width="272" height="100" fill="#e4d5ad"/></svg>'}));
+  await context.route('**/api/v1/captures',route=>{originalUploads++;return route.fulfill({json:{enabled:true,stored:true,id:'a'.repeat(64)}})});
   await context.route('**/api/v1/health',route=>{healthRequests++;return failHealthOnce&&healthRequests===1?route.fulfill({status:503,json:{detail:'Starting'}}):route.fulfill({json:{ok:true,ocr:'PaddleOCR',lang:'cs'}})});
   await context.route('**/api/v1/scan*',async route=>{
     active++;maximum=Math.max(maximum,active);requests++;
-    await new Promise(resolve=>setTimeout(resolve,75));
+    await new Promise(resolve=>setTimeout(resolve,responseDelay));
     const cards=selected.map((id,i)=>({id,name:id,accepted:true,ocrText:id,matchConfidence:1,combinedConfidence:.98,ocrConfidence:.99,titleConfidence:.85,box:{x0:.03+(i%4)*.24,y0:.12+Math.floor(i/4)*.4,x1:.22+(i%4)*.24,y1:.24+Math.floor(i/4)*.4}}));
-    try{await route.fulfill({json:{processingMs:75,cards,candidates:[]}})}finally{active--}
+    try{await route.fulfill({json:{processingMs:75,cards,candidates:[],capture:{enabled:true,stored:true,id:'b'.repeat(64)}}})}finally{active--}
   });
-  return ()=>({maximum,requests,healthRequests})
+  const stats=()=>({maximum,requests,healthRequests,originalUploads});stats.delay=ms=>{responseDelay=ms};return stats
 }
 async function layout(page,width,height){
   await page.setViewportSize({width,height});
@@ -60,14 +62,15 @@ async function layout(page,width,height){
   const browser=await chromium.launch({executablePath:'/usr/bin/chromium-browser',headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--renderer-process-limit=2','--num-raster-threads=1','--host-resolver-rules=MAP scanner.invalid 127.0.0.1']});
   const failures=[];
   try{
-    const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
+    const context=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
     await context.addInitScript(mockCamera,false);const stats=await api(context,ids,true);const page=await context.newPage();page.on('pageerror',error=>failures.push(error.message));
     await page.goto('http://localhost:8193/');
     await page.waitForFunction(()=>document.getElementById('handCount').textContent==='8');
     assert.equal(await page.evaluate(()=>window.__cameraRequests),1,'camera must start without clicking');
     assert.equal(await page.evaluate(()=>window.__cameraConstraints.audio),false);
     assert.equal(await page.locator('.cardSnap').count(),8,'Nekromant must permit the eighth card');
-    assert.equal(await page.evaluate(()=>[...document.querySelectorAll('.cardSnap img')].filter(img=>img.src.startsWith('data:image/jpeg')&&img.naturalWidth>0).length),8);
+    await page.waitForFunction(()=>[...document.querySelectorAll('.cardSnap img')].length===8&&[...document.querySelectorAll('.cardSnap img')].every(img=>img.complete&&img.naturalWidth>0));
+    assert.equal(await page.evaluate(()=>[...document.querySelectorAll('.cardSnap img')].filter(img=>img.getAttribute('src').startsWith('/card-images/')&&img.naturalWidth>0).length),8);
     assert.equal(await page.locator('#score').textContent(),String(await page.evaluate(()=>hand.score(discard))));
     const crop=await page.evaluate(()=>window.__videoCrop);assert.ok(crop.args[1]>0);assert.ok(crop.args[3]<crop.height,'scan must crop to visible camera panel');
     assert.equal(stats().maximum,1,'OCR requests must remain serial');
@@ -80,11 +83,15 @@ async function layout(page,width,height){
     await page.waitForFunction(()=>hand.getCardById('FR49').actionData&&hand.getCardById('FR49').actionData[1]==='flood');
     await page.locator('[data-card-id="FR01"]').click();await page.locator('#removeCard').click();
     await page.waitForTimeout(400);assert.equal(await page.locator('#handCount').textContent(),'7','removed card must stay suppressed');
+    await page.locator('#resetHand').click();
+    await page.evaluate(()=>{window.__clockOffset=10000});await page.waitForTimeout(500);
+    assert.equal(await page.locator('#handCount').textContent(),'0','cleared hand must stay empty while old cards remain visible');
+    assert.equal(await page.locator('#score').textContent(),'0');
     await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'))});
     assert.equal(await page.evaluate(()=>window.__streams[0].getTracks().every(track=>track.readyState==='ended')),true);
     await context.close();
 
-    const plain=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});await plain.addInitScript(mockCamera,false);await api(plain,ids.slice(0,7));
+    const plain=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});await plain.addInitScript(mockCamera,false);const photoStats=await api(plain,ids.slice(0,7));
     const photo=await plain.newPage();photo.on('pageerror',error=>failures.push(error.message));await photo.goto('http://scanner.invalid:8193/');
     await photo.waitForSelector('.cameraFrame.photoMode');assert.equal(await photo.evaluate(()=>window.isSecureContext),false);assert.equal(await photo.evaluate(()=>window.__cameraRequests),0);
     assert.match(await photo.locator('#cameraHint').textContent(),/HTTPS/);
@@ -93,12 +100,22 @@ async function layout(page,width,height){
     await photo.locator('#imageUpload').setInputFiles({name:'phone-camera.png',mimeType:'image/png',buffer:Buffer.from(image,'base64')});
     await photo.waitForFunction(()=>document.getElementById('handCount').textContent==='7');assert.equal(await photo.locator('.cardSnap').count(),7);
     assert.deepEqual(await photo.evaluate(()=>window.__lastEncoding),{width:960,height:1280,type:'image/jpeg',quality:.9},'native photos must use the measured JPEG settings');
+    assert.equal(photoStats().originalUploads,1,'original photo must be archived before OCR');
+    await photo.locator('#resetHand').click();assert.equal(await photo.locator('#handCount').textContent(),'0');
+    await photo.locator('#openManual').click();await photo.locator('#manualSearch').fill('kralovna');
+    await photo.locator('[data-manual-id="FR32"]').click();assert.equal(await photo.locator('#handCount').textContent(),'1');
+    assert.equal(await photo.locator('[data-card-id="FR32"] img').getAttribute('src'),'/card-images/FR32.webp');
+    photoStats.delay(450);
+    await photo.locator('#imageUpload').setInputFiles({name:'next-photo.png',mimeType:'image/png',buffer:Buffer.from(image,'base64')});
+    await photo.waitForFunction(()=>document.getElementById('ocrStatus').textContent.includes('Čtu'));
+    await photo.locator('#resetHand').click();await photo.waitForTimeout(650);
+    assert.equal(await photo.locator('#handCount').textContent(),'0','an in-flight photo must not refill a cleared hand');
     await plain.close();
 
-    const denied=await browser.newContext({viewport:{width:390,height:844}});await denied.addInitScript(mockCamera,true);await api(denied,[]);
+    const denied=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:844}});await denied.addInitScript(mockCamera,true);await api(denied,[]);
     const blocked=await denied.newPage();blocked.on('pageerror',error=>failures.push(error.message));await blocked.goto('http://localhost:8193/');await blocked.waitForSelector('.cameraFrame.photoMode');
     assert.match(await blocked.locator('#cameraHint').textContent(),/nastavení prohlížeče/);assert.equal(await blocked.evaluate(()=>window.__cameraRequests),1);
     await denied.close();assert.deepEqual(failures,[]);
-    console.log('PASS: automatic camera, health recovery, HTTP photo fallback, permission denial, snapshots, eight cards, scoring, effects, removal cooldown, serial requests, visible-frame crop, five viewport sizes.');
+    console.log('PASS: manual add, clear all, complete card images, original photo archiving, automatic camera, health recovery, HTTP photo fallback, permission denial, snapshots, eight cards, scoring, effects, removal cooldown, serial requests, visible-frame crop, five viewport sizes.');
   }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 })().catch(error=>{console.error(error);process.exitCode=1;server.close()});

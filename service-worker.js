@@ -1,4 +1,4 @@
-const CACHE="tajuplne-rise-remastered-v7";
+const CACHE="tajuplne-rise-remastered-v8";
 const ASSETS=["./","./index.html","./css/app.css","./js/deck.js","./js/discard.js","./js/hand.js","./js/cards-cz.js","./js/config.js","./js/scanner.js","./js/app.js","./manifest.webmanifest","./icons/icon.svg"];
 
 self.addEventListener("install",function(event){

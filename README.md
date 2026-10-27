@@ -23,6 +23,8 @@ na hostitelský OS.
 
 ```bash
 cp .env.example .env
+python3 backend/scripts/import_card_art.py
+mkdir -p data/captures
 ./scripts/start-lan.sh
 ```
 
@@ -54,11 +56,12 @@ Compose používá výhradně kořenový `Dockerfile`.
 ## Rozhraní a kamera na telefonu
 
 Aplikace vyplní jednu obrazovku bez scrollování. Horní banner ukazuje počet
-karet a skóre, pod ním přibývají skutečné snapy rozpoznaných karet. Spodních
-nejvýše 31 % výšky tvoří kamera. Na hlavní obrazovce nejsou tlačítka pro start,
-stop ani další ovládací panely. Klepnutí na snap otevře detail s odebráním
-karty a případným nastavením speciálního efektu. Snapy zůstávají jen v paměti
-aktuální stránky; neukládají se na server ani do úložiště prohlížeče.
+karet a skóre. Pod bannerem jsou tlačítka **Přidat kartu ručně** a **Odebrat
+všechny**. Následuje mřížka celých karet z dodaných originálních předloh;
+nejde o výřezy z kamery. Spodních nejvýše 31 % výšky tvoří kamera.
+Klepnutí na kartu otevře detail s odebráním a nastavením speciálního efektu.
+Ruční vyhledávání funguje i bez diakritiky. Vymazání ruky neobnoví starý
+rozpracovaný snímek ani stále viditelné odstraněné karty a nemaže archiv fotek.
 
 Na HTTPS (nebo localhost) se kamera spustí automaticky a prohlížeč vyžádá
 oprávnění. Snímky odpovídají přesně viditelné oblasti kamerového náhledu,
@@ -106,6 +109,11 @@ název, `ocrText`, `ocrConfidence`, `matchConfidence`, `secondMatchConfidence`,
 `matchMargin`, `titleConfidence`, `combinedConfidence`, `accepted` a box
 `{x0,y0,x1,y1}` normalizovaný do rozsahu 0–1. Debug přidává rozpoznané texty a rotace. S prefilterem se světlé oblasti pravidel vůbec nerozpoznávají; pro diagnostiku celého textu lze dočasně vypnout `TITLE_PREFILTER`.
 
+Odpověď také obsahuje `capture` s potvrzením uložení (`stored`, `id`) nebo
+chybou úložiště. `source` rozlišuje `live`, `photo` a `test`. Původní fotografii
+ukládá `POST /api/v1/captures`; její ID lze předat skenu jako `capture_id`,
+aby JSON propojil originál se zmenšeným OCR vstupem.
+
 Úplný titul se porovnává se všemi 54 názvy. I velmi vysoké skóre musí splnit
 minimální náskok před druhou shodou; samotný fragment jako „Elementál“ nestačí.
 Automatické přijetí dále vyžaduje OCR confidence a title-style threshold.
@@ -133,15 +141,39 @@ sekvenčně. API odpovědi se neukládají do PWA cache.
 
 ## Soukromí a testování
 
-`DEBUG_SAVE_FAILED_SCANS=false`: snímky se standardně neukládají. Pokud se
-ladění explicitně zapne, neúspěšné snímky skončí pouze v zapisovatelné vrstvě
-vlastního kontejneru v `/tmp/tajuplne-rise-scans`, bez sdíleného volume.
+`SAVE_CAPTURED_IMAGES=true`: nové snímky se ukládají do soukromého adresáře
+`data/captures/` v tomto workspace. Při focení se nejprve uloží původní soubor,
+potom JPEG použitý pro OCR a JSON s časem, zdrojem, boxy a výsledkem. Živé
+skenování ukládá odeslané JPEG framy. Přesné duplicity se deduplikují podle
+SHA-256. Archiv přežije restart i výměnu kontejneru a není dostupný jako HTTP
+adresář. OCR predikce v JSON nejsou ručně ověřené ground truth labely.
+
+Limit archivu je 5 GB, rezerva volného disku 2 GB, jednotlivý originál nejvýše
+25 MB. Po dosažení limitu aplikace oznámí neuložení snímku; starší fotografie
+se automaticky nemažou. Kapacitu řídí `CAPTURE_STORAGE_MAX_BYTES` a
+`MAX_ORIGINAL_PHOTO_BYTES`. Staré `DEBUG_SAVE_FAILED_SCANS=false` zůstává
+vypnuté; nové ukládání archivu je samostatná explicitně povolená funkce.
+
+Celé obrázky karet vznikají rozdělením šesti 3×3 předloh podle skutečných mezer
+mezi kartami, protože jejich rozměry na předlohách nejsou stejné. Zdrojové PNG
+jsou pouze v `data/card-originals/`, připojené do kontejneru read-only. Originály
+ani fotografie nejsou součástí Gitu nebo Docker image. Před prvním spuštěním:
+
+```bash
+python3 backend/scripts/import_card_art.py
+mkdir -p data/captures
+```
+
+Server zpřístupňuje jen malé celé karty `/card-images/FR01.webp` až FR54.webp,
+nikoliv původní listy nebo pořízené fotografie. Celý adresář `data/` je ignorován
+Gitem i Docker buildem. Bind mounty vedou výhradně do tohoto workspace.
 
 Nový ground truth byl ručně přečten přímo z 16 dodaných snímků: deset
 fotografií se 70 čitelnými názvy a šest předloh se všemi 54 kartami.
 Obsahuje SHA-256 každého souboru; staré IMG názvy se nepoužívají.
 
-Soukromé fotografie patří výhradně do `backend/tests/fixtures/scans/`.
+Dodané regresní fotografie se pro opakovatelné testy kopírují do
+`backend/tests/fixtures/scans/`; nové záběry aplikace ukládá do `data/captures/`.
 Tento adresář i uživatelský zdroj `testovaci-data/` jsou vyloučeny z Gitu
 i Docker build kontextu. Na tomto serveru jsou kopie v podadresářích `foto/`
 a `originaly/`. Pro opakované nasazení lze snímky lokálně importovat příkazem:

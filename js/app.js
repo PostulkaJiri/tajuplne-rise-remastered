@@ -21,7 +21,7 @@ var saveAction=document.getElementById("saveAction");
 var currentActionCardId=null;
 var liveSession=null,starting=false,photoBusy=false,generation=0;
 var allowLive=window.isSecureContext&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia;
-var snapshots={},suppressedUntil={},photoUrl=null;
+var suppressedUntil={},clearedCards={},photoUrl=null,handRevision=0,ignoreFramesBefore=0;
 var lastSnapshot={detections:[],candidates:[]};
 var suitNames={land:"Země",flood:"Potopa",weather:"Počasí",flame:"Oheň",army:"Armáda",wizard:"Čaroděj",leader:"Vůdce",beast:"Tvor",weapon:"Zbraň",artifact:"Artefakt",wild:"Divoká"};
 
@@ -56,12 +56,13 @@ function render(){
   document.getElementById("handCount").textContent=hand.size();
   document.getElementById("countLabel").textContent=hand.size()===1?"karta":(hand.size()>1&&hand.size()<5?"karty":"karet");
   emptyHand.hidden=hand.size()>0;
+  document.getElementById("resetHand").disabled=!hand.size();
   Array.from(handCards.children).forEach(function(node){if(!hand.getCardById(node.dataset.cardId))node.remove()});
   hand.cards().forEach(function(card){
     var node=handCards.querySelector('[data-card-id="'+card.id+'"]');
     if(!node){
       node=document.createElement("button");node.type="button";node.dataset.cardId=card.id;node.className="cardSnap new";
-      node.innerHTML='<img alt="" hidden><span class="snapPoints"></span><span class="snapCaption"><span class="snapName"></span><span class="snapState"></span></span>';
+      node.innerHTML='<img alt=""><span class="snapCaption"><span class="snapText"><span class="snapName"></span><span class="snapState"></span></span><span class="snapPoints"></span></span>';
       node.addEventListener("animationend",function(){node.classList.remove("new")});
       handCards.appendChild(node)
     }
@@ -72,35 +73,54 @@ function render(){
     node.querySelector(".snapName").textContent=reg.name;
     node.querySelector(".snapPoints").textContent=card.points();
     node.querySelector(".snapState").textContent=card.blanked?"Vymazaná":(node.classList.contains("needsEffect")?"Nastavit efekt":"");
-    if(snapshots[card.id]){var img=node.querySelector("img");if(img.getAttribute("src")!==snapshots[card.id])img.src=snapshots[card.id];img.hidden=false}
+    var img=node.querySelector("img"),url="/card-images/"+card.id+".webp";
+    if(img.getAttribute("src")!==url)img.src=url
   });
   layoutCards()
-}
-function captureSnap(source,box){
-  if(!source||!box)return null;
-  var width=source.naturalWidth||source.width,height=source.naturalHeight||source.height;
-  var titleWidth=Math.max(1,(box.x1-box.x0)*width),titleHeight=Math.max(1,(box.y1-box.y0)*height);
-  var x=Math.max(0,box.x0*width-titleWidth*.2),y=Math.max(0,box.y0*height-titleHeight*.4);
-  var w=Math.min(width-x,titleWidth*1.4),h=Math.min(height-y,w*1.4);
-  if(w<=0||h<=0)return null;
-  var canvas=document.createElement("canvas");canvas.width=240;canvas.height=Math.max(1,Math.round(240*h/w));
-  canvas.getContext("2d").drawImage(source,x,y,w,h,0,0,canvas.width,canvas.height);
-  return canvas.toDataURL("image/jpeg",.82)
 }
 function addConfirmed(items,source,observedAt){
   var added=0;
   items.forEach(function(item){
     if(!item.confirmed||!registryCard(item.id)||hand.getCardById(item.id)||suppressedUntil[item.id]>Date.now())return;
-    if(observedAt&&item.lastSeen!==observedAt)return;
+    if(observedAt&&(item.lastSeen!==observedAt||clearedCards[item.id]))return;
     if(!hand.addCard(deck.getCardById(item.id)))return;
-    snapshots[item.id]=captureSnap(source,item.bbox);added++
+    added++
   });
   if(added)render();return added
 }
+var manualDialog=document.getElementById("manualDialog"),manualSearch=document.getElementById("manualSearch");
+function renderManual(){
+  var query=CardScanner.normalizeText(manualSearch.value),rows=[];
+  baseIds().forEach(function(id){
+    var card=registryCard(id);
+    if(query&&CardScanner.normalizeText(card.name).indexOf(query)<0)return;
+    rows.push('<button type="button" class="manualCard" data-manual-id="'+id+'"'+(hand.getCardById(id)?' disabled':'')+'><img src="/card-images/'+id+'.webp" alt="" loading="lazy"><span>'+escapeHtml(card.name)+(hand.getCardById(id)?'<small>V ruce</small>':'')+'</span><b aria-hidden="true">＋</b></button>')
+  });
+  document.getElementById("manualResults").innerHTML=rows.join("")||'<p>Žádná karta neodpovídá hledání.</p>'
+}
+document.getElementById("openManual").addEventListener("click",function(){manualSearch.value="";document.getElementById("manualStatus").textContent="";renderManual();manualDialog.showModal();manualSearch.focus()});
+manualSearch.addEventListener("input",renderManual);
+document.getElementById("manualResults").addEventListener("click",function(event){
+  var node=event.target.closest("[data-manual-id]");if(!node||node.disabled)return;
+  var id=node.dataset.manualId;
+  if(!hand.addCard(deck.getCardById(id))){document.getElementById("manualStatus").textContent="Tuto kartu teď nelze přidat. Limit ruky je "+hand.limit()+" karet.";return}
+  delete suppressedUntil[id];delete clearedCards[id];render();manualDialog.close()
+});
+document.getElementById("resetHand").addEventListener("click",function(){
+  var now=Date.now();handRevision++;ignoreFramesBefore=now;
+  hand.cards().forEach(function(card){clearedCards[card.id]=now});
+  (lastSnapshot.detections||[]).forEach(function(item){if(item.id)clearedCards[item.id]=now});
+  hand.clear();currentActionCardId=null;render();setStatus("Ruka je prázdná. Namiřte na další karty.")
+});
+function updateClearedCards(snapshot){
+  var fresh=new Set((snapshot.detections||[]).filter(function(item){return item.lastSeen===snapshot.observedAt}).map(function(item){return item.id}));
+  Object.keys(clearedCards).forEach(function(id){if(fresh.has(id))clearedCards[id]=snapshot.observedAt;else if(snapshot.observedAt-clearedCards[id]>1500)delete clearedCards[id]})
+}
+function storageWarning(capture){return capture&&capture.enabled&&!capture.stored?(capture.error==="quota"||capture.error==="disk_space"?"Úložiště fotografií je plné. Snímek se neuložil.":"Fotografii se nepodařilo uložit."):""}
 handCards.addEventListener("click",function(event){var node=event.target.closest("[data-card-id]");if(node)openCard(node.dataset.cardId)});
 document.getElementById("removeCard").addEventListener("click",function(){
   if(!currentActionCardId)return;
-  suppressedUntil[currentActionCardId]=Date.now()+8000;hand.deleteCardById(currentActionCardId);delete snapshots[currentActionCardId];
+  suppressedUntil[currentActionCardId]=Date.now()+8000;hand.deleteCardById(currentActionCardId);
   currentActionCardId=null;actionDialog.close();render()
 });
 document.getElementById("clearEffect").addEventListener("click",function(){if(currentActionCardId){hand.undoCardAction(currentActionCardId);render();actionDialog.close()}});
@@ -201,7 +221,12 @@ async function startPreview(){
     placeholder.hidden=true;photoPreview.hidden=true;
     liveSession=CardScanner.createLiveScanner(camera,{
       onStatus:function(info){setStatus(info.state==="loading"?"Připojuji scanner…":"Namiřte na názvy karet")},
-      onUpdate:function(snapshot){lastSnapshot=snapshot;var added=addConfirmed(snapshot.detections||[],snapshot.frame,snapshot.observedAt);drawOverlay(snapshot);setStatus(added?"Přidáno "+added+" · "+hand.size()+" karet v ruce":"Hledám další karty…",added?"ok":"")},
+      onUpdate:function(snapshot){
+        lastSnapshot=snapshot;updateClearedCards(snapshot);
+        var added=snapshot.capturedAt>ignoreFramesBefore?addConfirmed(snapshot.detections||[],snapshot.frame,snapshot.observedAt):0;
+        drawOverlay(snapshot);var warning=storageWarning(snapshot.capture);
+        setStatus(warning||(added?"Přidáno "+added+" · "+hand.size()+" karet v ruce":"Hledám další karty…"),warning?"error":(added?"ok":""))
+      },
       onError:function(){setStatus("Scanner se znovu připojuje…","error")}
     });
     stream.getVideoTracks().forEach(function(track){track.addEventListener("ended",function(){if(ticket===generation){stopPreview();allowLive=false;photoMode("Fotoaparát se odpojil","Klepnutím můžete vyfotit další karty.")}})})
@@ -214,13 +239,18 @@ cameraFrame.addEventListener("click",function(){if(cameraFrame.classList.contain
 cameraFrame.addEventListener("keydown",function(event){if((event.key==="Enter"||event.key===" ")&&cameraFrame.classList.contains("photoMode")){event.preventDefault();if(!photoBusy)upload.click()}});
 upload.addEventListener("change",async function(){
   var file=upload.files&&upload.files[0];upload.value="";if(!file||photoBusy)return;
-  photoBusy=true;stopPreview();cameraFrame.setAttribute("aria-busy","true");
+  photoBusy=true;var revision=handRevision;stopPreview();cameraFrame.setAttribute("aria-busy","true");
   try{
     if(photoUrl)URL.revokeObjectURL(photoUrl);photoUrl=URL.createObjectURL(file);
     photoPreview.src=photoUrl;await photoPreview.decode();photoPreview.hidden=false;placeholder.hidden=true;
     setStatus("Čtu názvy karet…");
-    var found=await CardScanner.recognize(photoPreview);var added=addConfirmed(found,photoPreview);
-    setStatus(added?"Přidáno "+added+" · Klepněte pro další fotku":(found.length?"Karty už jsou v ruce · Klepněte pro další fotku":"Názvy nejsou čitelné · Zkuste další fotku"),added?"ok":"");
+    var originalCapture,scanCapture;
+    try{originalCapture=await CardScanner.archivePhoto(file)}catch(error){originalCapture={enabled:true,stored:false,error:"write_failed"}}
+    var found=await CardScanner.recognize(photoPreview,function(info){if(info.capture)scanCapture=info.capture},originalCapture&&originalCapture.id);
+    var added=revision===handRevision?addConfirmed(found,photoPreview):0;
+    var warning=storageWarning(scanCapture)||storageWarning(originalCapture);
+    if(originalCapture&&!originalCapture.stored&&scanCapture&&scanCapture.stored)warning="Originál se neuložil, zmenšená fotka je uložená.";
+    setStatus(warning||(revision!==handRevision?"Ruka je prázdná · Vyfoťte další karty":(added?"Přidáno "+added+" · Klepněte pro další fotku":(found.length?"Karty už jsou v ruce · Klepněte pro další fotku":"Názvy nejsou čitelné · Zkuste další fotku"))),warning?"error":(added?"ok":""));
     cameraFrame.classList.add("photoMode");cameraFrame.setAttribute("role","button");cameraFrame.tabIndex=0
   }catch(error){photoMode("Fotografii se nepodařilo načíst","Klepnutím zkuste vyfotit karty znovu.");setStatus(error.message||"Zkuste další fotografii.","error")}
   finally{photoBusy=false;cameraFrame.removeAttribute("aria-busy")}

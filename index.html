@@ -30,6 +30,11 @@
       </div>
     </header>
 
+    <nav class="handTools" aria-label="Správa ruky">
+      <button id="openManual" type="button"><span aria-hidden="true">＋</span> Přidat kartu ručně</button>
+      <button id="resetHand" type="button" class="danger" disabled>Odebrat všechny</button>
+    </nav>
+
     <main class="handArea" aria-label="Naskenované karty">
       <div id="emptyHand" class="emptyHand">
         <svg viewBox="0 0 100 108" fill="none" aria-hidden="true"><rect x="17" y="14" width="54" height="76" rx="8" transform="rotate(-12 17 14)"/><rect x="30" y="19" width="54" height="76" rx="8"/><path d="m43 54 9 8 6-15 6 15 9-8-5 23H48Z"/></svg>
@@ -53,6 +58,15 @@
       <input id="imageUpload" type="file" accept="image/*" capture="environment" hidden>
     </section>
   </div>
+
+  <dialog id="manualDialog" aria-labelledby="manualTitle">
+    <form method="dialog" class="dialogCard">
+      <div class="dialogHead"><h2 id="manualTitle">Přidat kartu ručně</h2><button value="cancel" class="closeDialog" aria-label="Zavřít">×</button></div>
+      <input id="manualSearch" type="search" placeholder="Název karty…" autocomplete="off" aria-label="Vyhledat kartu">
+      <p id="manualStatus" role="status"></p>
+      <div id="manualResults" class="manualResults"></div>
+    </form>
+  </dialog>
 
   <dialog id="actionDialog" aria-labelledby="actionTitle">
     <form method="dialog" class="dialogCard">
