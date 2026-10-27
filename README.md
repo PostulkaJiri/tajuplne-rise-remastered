@@ -51,18 +51,47 @@ Kontejner má limit 2 CPU, 4 GiB RAM, 128 procesů a dva inference thready.
 Staré Dockerfile v `backend/` a `frontend/` nejsou součástí tohoto deploymentu;
 Compose používá výhradně kořenový `Dockerfile`.
 
-## Kamera a pozdější HTTPS
+## Rozhraní a kamera na telefonu
 
-HTTP adresa v LAN slouží pro kontrolu aplikace, API a nahrávání fotografií.
-Živá kamera na telefonu vyžaduje zabezpečený HTTPS origin. Tato fáze nemění
-Caddy, DNS, TLS, firewall ani existující Docker networks.
+Aplikace vyplní jednu obrazovku bez scrollování. Horní banner ukazuje počet
+karet a skóre, pod ním přibývají skutečné snapy rozpoznaných karet. Spodních
+nejvýše 31 % výšky tvoří kamera. Na hlavní obrazovce nejsou tlačítka pro start,
+stop ani další ovládací panely. Klepnutí na snap otevře detail s odebráním
+karty a případným nastavením speciálního efektu. Snapy zůstávají jen v paměti
+aktuální stránky; neukládají se na server ani do úložiště prohlížeče.
 
-Později lze po samostatném schválení nastavit existující reverse proxy na
-`192.168.0.249:18080`, nebo naplánovat její přístup k jedinému upstreamu
-`tajuplne-rise-remastered-ocr:8000`. HTTPS origin má servírovat frontend i
-`/api/*`. `js/config.js` používá stejný origin (`scannerApiBase: ""`).
-Na proxy pak nastav limit těla 8 MB, konečný timeout a jednoduchý rate limit
-pro `POST /api/v1/scan`; zde se žádná proxy nekonfiguruje.
+Na HTTPS (nebo localhost) se kamera spustí automaticky a prohlížeč vyžádá
+oprávnění. Snímky odpovídají přesně viditelné oblasti kamerového náhledu,
+takže se neskenují karty schované mimo jeho výřez. Po přechodu stránky do
+pozadí se kamera a OCR zastaví; po návratu se obnoví.
+
+**Na současné HTTP LAN adrese živý náhled telefon nepovolí.** Aplikace proto
+nabídne focení klepnutím přímo do spodní kamerové části. Využívá systémový
+fotoaparát / výběr obrázku pomocí `input capture="environment"`; po vyfocení
+odešle obrázek do téhož místního OCR a přidá snapy i skóre. Stejná možnost je
+dostupná po zamítnutí oprávnění pro živou kameru. Při trvale zamítnutém
+oprávnění je potřeba přístup povolit v nastavení prohlížeče.
+
+Požadavek na zabezpečený origin popisuje
+[MDN getUserMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
+HTTPS, Caddy, DNS, firewall ani existující Docker networks se v této fázi
+nemění. Pro automatický živý náhled na telefonu je následně potřeba samostatně
+povolit HTTPS integraci a určit doménu. Existující reverse proxy pak může
+směřovat na `192.168.0.249:18080`, frontend i `/api/*` na stejném originu.
+`js/config.js` proto zachovává `scannerApiBase: ""`.
+
+Mobilní browser testy s vygenerovaným obrazem a simulovanými OCR odpověďmi
+běží pouze během Docker buildu, bez dalšího runtime kontejneru:
+
+```bash
+docker build --target ui-artifacts \
+  --output type=local,dest=backend/local-ocr/ui-preview .
+```
+
+Prověřují automatickou žádost, HTTP fallback, zamítnutí oprávnění, snapy,
+scoring, efekty, cooldown odstranění, osmou kartu, sériové požadavky, výřez
+kamery a pět viewportů. Fyzický iPhone ani jeho dialog oprávnění nebyl vzdáleně
+ovládán. Podrobnosti jsou ve [frontend/UX_REPORT.md](frontend/UX_REPORT.md).
 
 ## OCR endpoint a konfigurace
 
