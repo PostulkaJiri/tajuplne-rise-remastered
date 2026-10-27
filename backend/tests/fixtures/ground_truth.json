@@ -1,0 +1,122 @@
+[
+  {
+    "image": "IMG_5707.jpeg",
+    "expected": [
+      "Bojová vzducholoď",
+      "Elementál vody",
+      "Kouř",
+      "Nekromant",
+      "Elfský luk",
+      "Těžká jízda",
+      "Tornádo"
+    ]
+  },
+  {
+    "image": "IMG_5708.jpeg",
+    "expected": [
+      "Bojová vzducholoď",
+      "Elementál vody",
+      "Kouř",
+      "Nekromant",
+      "Elfský luk",
+      "Těžká jízda",
+      "Tornádo"
+    ]
+  },
+  {
+    "image": "IMG_5709.jpeg",
+    "expected": [
+      "Nejvyšší mág",
+      "Drak",
+      "Elementál ohně",
+      "Zvonice",
+      "Kethský štít",
+      "Jednorožec",
+      "Bouře"
+    ]
+  },
+  {
+    "image": "IMG_5710.jpeg",
+    "expected": [
+      "Válečná loď",
+      "Šašek",
+      "Magická hůl",
+      "Kethský meč",
+      "Les",
+      "Pán šelem",
+      "Požár"
+    ]
+  },
+  {
+    "image": "IMG_5711.jpeg",
+    "expected": [
+      "Ostrov",
+      "Hora",
+      "Blesk",
+      "Svíčka",
+      "Elementál země",
+      "Velitel",
+      "Hydra"
+    ]
+  },
+  {
+    "image": "IMG_5712.jpeg",
+    "expected": [
+      "Král",
+      "Stoletá voda",
+      "Fontána života",
+      "Sběratel",
+      "Rytířky",
+      "Elfí lučištníci",
+      "Bažina"
+    ]
+  },
+  {
+    "image": "IMG_5713.jpeg",
+    "expected": [
+      "Hraničáři",
+      "Princezna",
+      "Kouzelnice",
+      "Přelud",
+      "Jeskyně",
+      "Císařovna",
+      "Válečný oř"
+    ]
+  },
+  {
+    "image": "IMG_5714.jpeg",
+    "expected": [
+      "Elementál vzduchu",
+      "Dvojník",
+      "Strom světa",
+      "Bazilišek",
+      "Sněhová vánice",
+      "Trpasličí pěchota",
+      "Ochranná runa"
+    ]
+  },
+  {
+    "image": "IMG_5715.jpeg",
+    "expected": [
+      "Elementál vzduchu",
+      "Dvojník",
+      "Strom světa",
+      "Ochranná runa",
+      "Kovárna",
+      "Královna",
+      "Kniha proměn"
+    ]
+  },
+  {
+    "image": "IMG_5716.jpeg",
+    "expected": [
+      "Sběratel",
+      "Rytířky",
+      "Elfí lučištníci",
+      "Bažina",
+      "Bazilišek",
+      "Sněhová vánice",
+      "Trpasličí pěchota"
+    ]
+  }
+]

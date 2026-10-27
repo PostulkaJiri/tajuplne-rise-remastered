@@ -1,0 +1,6 @@
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+backend/tests/fixtures/scans/*
+!backend/tests/fixtures/scans/.gitkeep

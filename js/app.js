@@ -304,7 +304,7 @@ function startLive(){
       renderLiveSummary(snapshot);
       var confirmed=lastDetections.filter(function(d){return d.confirmed}).length;
       var extra=added.length?(" · přidáno: "+added.join(", ")):"";
-      setStatus("Živě: "+lastDetections.length+" titulů, "+confirmed+" potvrzených · průchod "+snapshot.angle+"° / "+snapshot.elapsedMs+" ms"+extra,"ok")
+      setStatus("Živě: "+lastDetections.length+" titulů, "+confirmed+" potvrzených · OCR "+snapshot.processingMs+" ms / celkem "+snapshot.elapsedMs+" ms"+extra,"ok")
     },
     onError:function(e){
       setStatus(e.message||String(e),"error")

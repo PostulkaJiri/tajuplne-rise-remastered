@@ -1,5 +1,5 @@
-const CACHE="tajuplne-rise-remastered-v3";
-const ASSETS=["./","./index.html","./css/app.css","./js/deck.js","./js/discard.js","./js/hand.js","./js/cards-cz.js","./js/scanner.js","./js/app.js","./manifest.webmanifest","./icons/icon.svg"];
+const CACHE="tajuplne-rise-remastered-v4";
+const ASSETS=["./","./index.html","./css/app.css","./js/deck.js","./js/discard.js","./js/hand.js","./js/cards-cz.js","./js/config.js","./js/scanner.js","./js/app.js","./manifest.webmanifest","./icons/icon.svg"];
 
 self.addEventListener("install",function(event){
   event.waitUntil(caches.open(CACHE).then(function(cache){return cache.addAll(ASSETS)}));
