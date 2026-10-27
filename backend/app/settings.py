@@ -26,7 +26,7 @@ def _env_int(name: str, default: int) -> int:
 
 
 def _rotations() -> tuple[float, ...]:
-    raw = os.getenv("SCAN_ROTATIONS", "0")
+    raw = os.getenv("SCAN_ROTATIONS", "0,-15")
     values: list[float] = []
     for item in raw.split(","):
         item = item.strip()
@@ -46,6 +46,8 @@ class Settings:
     detection_model: str = os.getenv("PADDLE_DETECTION_MODEL", "PP-OCRv5_mobile_det")
     recognition_model: str = os.getenv("PADDLE_RECOGNITION_MODEL", "latin_PP-OCRv5_mobile_rec")
     paddle_device: str = os.getenv("PADDLE_DEVICE", "cpu")
+    detection_max_side: int = _env_int("PADDLE_DETECTION_MAX_SIDE", 960)
+    detection_box_threshold: float = _env_float("PADDLE_DETECTION_BOX_THRESHOLD", 0.50)
     cpu_threads: int = _env_int("PADDLE_CPU_THREADS", 2)
     rotations: tuple[float, ...] = _rotations()
 
@@ -55,6 +57,7 @@ class Settings:
     candidate_min_score: float = _env_float("CANDIDATE_MIN_SCORE", 58.0)
 
     min_ocr_score: float = _env_float("MIN_OCR_SCORE", 0.32)
+    title_prefilter: bool = _env_bool("TITLE_PREFILTER", True)
     min_title_style: float = _env_float("MIN_TITLE_STYLE", 0.30)
 
     max_image_bytes: int = _env_int("MAX_IMAGE_BYTES", 8_000_000)

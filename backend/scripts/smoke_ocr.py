@@ -21,6 +21,8 @@ for index in range(3):
     with urllib.request.urlopen(request, timeout=60) as response:
         result = json.load(response)
     assert {item["id"] for item in result["cards"]} == {"FR32"}, result
-    assert any("drak" in item["text"].lower() for item in result["debug"]["rawTexts"]), result
+    # Bright rules regions may be removed before recognition by the title
+    # prefilter. They must never become accepted cards or live candidates.
+    assert all(item["id"] != "FR39" for item in result["cards"] + result["candidates"]), result
     runs.append({"pass": index + 1, **result})
 print(json.dumps({"kind": "synthetic smoke; not real photograph acceptance", "imageSize": [1280, 720], "jpegQuality": 80, "payloadBytes": encoded.size, "runs": runs}, ensure_ascii=False, indent=2))

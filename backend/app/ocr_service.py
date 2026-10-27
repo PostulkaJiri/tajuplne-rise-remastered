@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import math
-import os
 import time
 from pathlib import Path
 from typing import Any
@@ -123,6 +122,71 @@ def _title_style_score(image: np.ndarray, poly: np.ndarray) -> float:
     return max(0.0, min(1.0, score))
 
 
+
+
+class _TitleCropFilter:
+    """Skip recognition only where the downstream title filter cannot accept."""
+
+    def __init__(self, cropper: Any, threshold: float) -> None:
+        self.cropper = cropper
+        self.threshold = threshold
+
+    def __call__(self, image: np.ndarray, polygons: list[np.ndarray]):
+        for poly, crop in zip(polygons, self.cropper(image, polygons)):
+            if _title_style_score(image, poly) < self.threshold:
+                yield crop[:0, :0]
+            else:
+                yield crop
+
+
+def _join_title_fragments(
+    image: np.ndarray,
+    records: list[tuple[str, float, np.ndarray]],
+    matcher: CardMatcher,
+    min_ocr_score: float,
+    min_title_style: float,
+) -> list[tuple[str, float, np.ndarray]]:
+    """Join adjacent, aligned title fragments without accepting a fragment alone."""
+    fragments = []
+    for text, score, poly in records:
+        match = matcher.match(text)
+        if (match is not None and not match.accepted and score >= min_ocr_score
+                and _title_style_score(image, poly) >= min_title_style):
+            fragments.append((text, score, np.asarray(poly, dtype=np.float32), match.card.id))
+    joined = []
+    for index, (text_a, score_a, poly_a, id_a) in enumerate(fragments):
+        for text_b, score_b, poly_b, id_b in fragments[index + 1:]:
+            if id_a != id_b or len(poly_a) != 4 or len(poly_b) != 4:
+                continue
+            direction_a = poly_a[1] - poly_a[0]
+            direction_b = poly_b[1] - poly_b[0]
+            width_a, width_b = np.linalg.norm(direction_a), np.linalg.norm(direction_b)
+            height_a = np.linalg.norm(poly_a[3] - poly_a[0])
+            height_b = np.linalg.norm(poly_b[3] - poly_b[0])
+            if min(width_a, width_b, height_a, height_b) < 1:
+                continue
+            direction = direction_a / width_a
+            if np.dot(direction, direction_b / width_b) < math.cos(math.radians(12)):
+                continue
+            if min(height_a, height_b) / max(height_a, height_b) < 0.65:
+                continue
+            offset = poly_b.mean(axis=0) - poly_a.mean(axis=0)
+            along = float(np.dot(offset, direction))
+            across = abs(float(np.dot(offset, [-direction[1], direction[0]])))
+            gap = abs(along) - (width_a + width_b) / 2
+            if across > 0.45 * min(height_a, height_b):
+                continue
+            if not (-0.35 * min(width_a, width_b) <= gap <= 1.2 * max(height_a, height_b)):
+                continue
+            text = f"{text_a} {text_b}" if along >= 0 else f"{text_b} {text_a}"
+            match = matcher.match(text)
+            if match is None or not match.accepted or match.card.id != id_a:
+                continue
+            poly = cv2.boxPoints(cv2.minAreaRect(np.vstack([poly_a, poly_b])))
+            joined.append((text, min(score_a, score_b), poly))
+    return joined
+
+
 def _normalized_box(poly: np.ndarray, width: int, height: int) -> dict[str, float]:
     pts = np.asarray(poly, dtype=np.float32).reshape(-1, 2)
     x0, y0 = pts.min(axis=0)
@@ -153,6 +217,9 @@ class OcrService:
         self.ocr = PaddleOCR(
             text_detection_model_name=settings.detection_model,
             text_recognition_model_name=settings.recognition_model,
+            text_det_limit_side_len=settings.detection_max_side,
+            text_det_limit_type="max",
+            text_det_box_thresh=settings.detection_box_threshold,
             use_doc_orientation_classify=False,
             use_doc_unwarping=False,
             use_textline_orientation=True,
@@ -160,6 +227,15 @@ class OcrService:
             enable_mkldnn=settings.paddle_device == "cpu",
             cpu_threads=settings.cpu_threads,
         )
+
+        # PaddleX 3.6.1 already discards empty crops and keeps polygons aligned.
+        # Filter before orientation/recognition, using the same title threshold
+        # as candidate selection. Detection and all matching rules stay intact.
+        if settings.title_prefilter:
+            pipeline = self.ocr.paddlex_pipeline._pipeline
+            pipeline._crop_by_polys = _TitleCropFilter(
+                pipeline._crop_by_polys, settings.min_title_style * 0.50,
+            )
 
     def scan(self, image: np.ndarray, debug: bool = False) -> dict[str, Any]:
         started = time.perf_counter()
@@ -173,7 +249,12 @@ class OcrService:
             results = self.ocr.predict(rotated)
 
             for result in results:
-                for text, ocr_score, poly in _records(result):
+                records = _records(result)
+                records.extend(_join_title_fragments(
+                    rotated, records, self.matcher,
+                    self.settings.min_ocr_score, self.settings.min_title_style,
+                ))
+                for text, ocr_score, poly in records:
                     match = self.matcher.match(text)
                     title_style = _title_style_score(rotated, poly)
                     original_poly = _map_polygon(poly, inverse)

@@ -2,8 +2,8 @@
 const API_BASE=((window.APP_CONFIG&&window.APP_CONFIG.scannerApiBase)||"").replace(/\/$/,"");
 const SCAN_URL=API_BASE+"/api/v1/scan";
 const HEALTH_URL=API_BASE+"/api/v1/health";
-const FRAME_MAX_DIM=1600;
-const JPEG_QUALITY=.78;
+const FRAME_MAX_DIM=1280;
+const JPEG_QUALITY=.90;
 const FRAME_DELAY_MS=120;
 const TRACK_TTL_MS=5000;
 const TRACK_RESET_MS=9000;
