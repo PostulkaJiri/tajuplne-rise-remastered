@@ -39,3 +39,39 @@ def test_king_does_not_silently_become_queen():
     result = m.match("Král")
     assert result is not None
     assert result.card.id == "FR31"
+
+
+def test_every_complete_dictionary_title_is_accepted():
+    m = matcher()
+    for card in m.cards:
+        match = m.match(card.name)
+        assert match.card.id == card.id
+        assert match.accepted, card.name
+
+
+def test_shared_title_fragments_remain_candidates():
+    m = matcher()
+    for fragment in ("Elementál", "Kethský"):
+        match = m.match(fragment)
+        assert match is None or not match.accepted, fragment
+
+
+def test_very_high_but_ambiguous_scores_do_not_bypass_margin(tmp_path):
+    cards = tmp_path / "cards.json"
+    cards.write_text('[{"id":"FR01","name":"abcdefghijx"},{"id":"FR02","name":"abcdefghijy"}]')
+    m = CardMatcher(cards, 78, 92, 7, 58)
+    match = m.match("abcdefghij")
+    assert match.score > 92
+    assert match.margin == 0
+    assert not match.accepted
+
+
+def test_close_complete_titles_keep_their_identity():
+    m = matcher()
+    for title, card_id in (("Král", "FR31"), ("Královna", "FR32"),
+                           ("Kethský meč", "FR43"), ("Kethský štít", "FR46"),
+                           ("Elementál země", "FR05"), ("Elementál vody", "FR10"),
+                           ("Elementál vzduchu", "FR15"), ("Elementál ohně", "FR20")):
+        match = m.match(title)
+        assert match.card.id == card_id
+        assert match.accepted

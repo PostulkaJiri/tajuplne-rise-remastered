@@ -57,12 +57,9 @@ class CardMatcher:
     def _score(cleaned: str, title: str) -> float:
         if not cleaned or not title:
             return 0.0
-        ratio = float(fuzz.ratio(cleaned, title))
-        wratio = float(fuzz.WRatio(cleaned, title))
-        partial = float(fuzz.partial_ratio(cleaned, title))
-        # Exact-ish title OCR benefits from ratio; partial helps if ML Kit/Paddle
-        # glues the strength value or a small decorative fragment to the title.
-        return max(ratio, wratio, partial * 0.96)
+        # Compare the complete title. Partial matching scores a shared word
+        # (e.g. "Elementál") highly against multiple different cards.
+        return float(fuzz.ratio(cleaned, title))
 
     def match(self, text: str) -> Match | None:
         cleaned = normalize_text(text)
@@ -84,12 +81,9 @@ class CardMatcher:
         length_delta = abs(len(cleaned) - len(best.normalized))
         length_ok = length_delta <= max(4, round(len(best.normalized) * 0.40))
         accepted = (
-            best_score >= self.high_score
-            or (
-                best_score >= self.accept_score
-                and margin >= self.min_margin
-                and length_ok
-            )
+            margin >= self.min_margin
+            and length_ok
+            and (best_score >= self.high_score or best_score >= self.accept_score)
         )
 
         if best_score < self.candidate_min_score:
