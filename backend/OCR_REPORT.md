@@ -1,246 +1,254 @@
-# OCR deployment report — 27. 10. 2026
+# OCR report — 27. 10. 2026
 
-Nasazení na dedikovaném LAN portu funguje. Přesnost na reálných fotografiích
-zatím **nelze vyhodnotit**: chybí všech deset soukromých testovacích snímků.
-Požadované minimum 6/7 a precision automatických potvrzení proto nejsou ověřené.
-Syntetický smoke test níže toto acceptance kritérium nenahrazuje.
+**Finální HTTP regrese: 124/124 správných detekcí, 0 false positives,
+0 false negatives.** Všech deset fotografií má 7/7; šest předloh má 9/9.
+Ground truth byl vytvořen přímým ručním přečtením dodaných snímků.
 
-## Server
+## Server a deployment
 
-| Položka | Zjištěná hodnota |
+| Položka | Hodnota |
 | --- | --- |
 | CPU | Intel Core Ultra 7 265, 20 CPU, AVX/AVX2 |
-| RAM | 30.79 GiB, přibližně 24 GiB available při kontrolách |
-| Architecture | Linux x86_64 / amd64 |
-| Kernel | 6.8.0-147-generic |
+| RAM | 30.79 GiB, přibližně 23–24 GiB available při testech |
+| Architecture | Linux x86_64 / amd64, kernel 6.8.0-147-generic |
 | Docker | Engine 29.3.0, Compose v5.1.0 |
-| Python | 3.11 v Docker image |
-| PaddleOCR | 3.6.0 |
-| PaddlePaddle | CPU 3.2.0 |
-| PaddleX | 3.6.1 |
+| Python | 3.11 v image |
+| PaddleOCR / PaddlePaddle | 3.6.0 / CPU 3.2.0 |
+| PaddleX | připnutý 3.6.1 |
 | OpenCV / NumPy | 4.10.0 / 1.26.4 |
-| Runtime limits | 2 CPU, 4 GiB RAM, 128 PIDs, dva inference thready |
+| Kontejner | tajuplne-rise-remastered-ocr |
+| Host binding | 192.168.0.249:18080 → 8000/tcp |
+| Limity | 2 CPU, 4 GiB, 128 PIDs, dva inference thready |
 
-Žádné ML/runtime balíčky nebyly instalovány na hostitelský OS. Systémové
-knihovny i Python/Node nástroje se instalovaly pouze při Docker buildu.
+Běží jediná Compose service `tajuplne-rise` a jeden hlavní Uvicorn worker.
+FastAPI servíruje PWA i API. Aplikace a health vracejí přes LAN HTTP 200,
+`/api/v1/cards` obsahuje přesně 54 karet FR01–FR54. Kontejner je `healthy`,
+bez OOM a bez automatických restartů. Během testů se používalo přibližně
+650 MiB pro samotnou zahřátou aplikaci; dočasné sekvenční experimenty zůstaly
+uvnitř stejného 4GiB/2CPU limitu. Žádné hostitelské balíčky nebyly instalovány.
 
-## Deployment
+## Nezávislý referenční seznam
 
-- Jediná Compose service: `tajuplne-rise`.
-- Kontejner: `tajuplne-rise-remastered-ocr`.
-- Jediný hlavní proces: Uvicorn, jeden worker, interně `0.0.0.0:8000`.
-- Host binding: **`192.168.0.249:18080 -> 8000/tcp`**.
-- Před prvním startem byla read-only potvrzena LAN adresa na `enp129s0`,
-  nepřítomnost kolize v `docker ps` i prázdný výsledek `ss` pro TCP 18080.
-  Unikátní názvy kontejneru, network a volume tehdy neexistovaly.
-- Start provedl `scripts/start-lan.sh`; při konfliktu odmítne pokračovat.
-- Po aktualizaci a řízeném restartu zůstal kontejner `healthy`, bez OOM,
-  bez automatických restartů. Aktualizován/restartován byl pouze kontejner
-  prokazatelně vytvořený během této práce.
+Zdrojem je uživatelský adresář `testovaci-data/`. Každý snímek byl přečten
+vizuálně a názvy titulkových pásů zapsány do
+[ground_truth.json](tests/fixtures/ground_truth.json). Referenční seznam nevznikl
+převzetím detekcí OCR ani přiřazením ke starým IMG_5707–IMG_5716.
 
-| Kontrola přes `http://192.168.0.249:18080` | Výsledek |
-| --- | --- |
-| `/`, `/index.html` | HTTP 200, frontend |
-| `/js/config.js`, `/js/scanner.js` | HTTP 200 |
-| `/css/app.css`, `/icons/icon.svg` | HTTP 200 |
-| `/manifest.webmanifest`, `/service-worker.js` | HTTP 200 |
-| `/api/v1/health` | HTTP 200, skutečný inicializovaný PaddleOCR |
-| `/api/v1/cards` | HTTP 200, přesně FR01–FR54, 54 karet |
-| `/api/v1/scan?debug=true` | HTTP 200, skutečná inference na syntetickém vstupu |
+- `foto/`: deset snímků 1152×1536, celkem 70 čitelných titulů.
+- `originaly/`: šest předloh 1055×1491, devět karet na předlohu, všech FR01–FR54.
+- Fotografie z 19:21:40 obsahuje také téměř úplně zakrytou další kartu bez
+  čitelného názvu. Její identita se nehádá a není očekávanou detekcí.
+- Každý záznam obsahuje SHA-256 konkrétního souboru. Evaluator při jiné fotografii
+  odmítne použít původní seznam očekávaných karet.
 
-HTTP kontroly byly provedeny ze serveru přes jeho LAN adresu; přístup z jiného
-fyzického LAN zařízení zatím nebyl otestován. Firewall se neměnil.
+Snímky zůstávají soukromé v původním adresáři a v ignorovaných kopiích
+`backend/tests/fixtures/scans/`. Soubory se nepřejmenovávaly ani neupravovaly.
 
 ## Finální OCR konfigurace
 
 ```text
-language: cs (Czech / Latin recognition model)
-OCR generation: PP-OCRv5
-detection model: PP-OCRv5_mobile_det
-recognition model: latin_PP-OCRv5_mobile_rec
-textline orientation: enabled
-CPU threads: 2
-frontend image resolution: maximum 1600 px longest side
-frontend JPEG quality: 0.78
-rotations: 0
-MATCH_ACCEPT_SCORE: 78
-MATCH_HIGH_SCORE: 92
-MATCH_MIN_MARGIN: 7 (required even for high scores)
-MIN_OCR_SCORE: 0.32
-MIN_TITLE_STYLE: 0.30
-candidate minimum fuzzy score: 58
-DEBUG_SAVE_FAILED_SCANS: false
+PADDLE_OCR_LANG=cs
+PADDLE_OCR_VERSION=PP-OCRv5
+PADDLE_DETECTION_MODEL=PP-OCRv5_mobile_det
+PADDLE_RECOGNITION_MODEL=latin_PP-OCRv5_mobile_rec
+PADDLE_DETECTION_MAX_SIDE=960 (limit_type=max)
+PADDLE_DETECTION_BOX_THRESHOLD=0.50
+PADDLE_CPU_THREADS=2
+SCAN_ROTATIONS=0,-15
+TITLE_PREFILTER=true
+MATCH_ACCEPT_SCORE=78
+MATCH_HIGH_SCORE=92
+MATCH_MIN_MARGIN=7 (platí i pro vysoké skóre)
+MIN_OCR_SCORE=0.32
+MIN_TITLE_STYLE=0.30
+candidate minimum fuzzy score=58
+frontend longest side=1280 px
+frontend JPEG quality=0.90
+DEBUG_SAVE_FAILED_SCANS=false
 ```
 
-Identitu určuje úplný OCR název porovnaný pomocí RapidFuzz se slovníkem 54
-názvů. Síla, suit, ilustrace a pravidla nejsou zdrojem identity. Title-style
-filtr zůstává založený na tmavosti okolí OCR boxu; jeho threshold nebyl laděn
-bez fotografií. Nejde o záruku správné filtrace pravidel za všech podmínek.
+Detekce textu se zmenší nejvýše na 960 px; recognition nadále čte výřezy z
+plného vstupního rozlišení. Před recognition se pomocí stejného style skóre
+vyřadí jen oblasti pod 0.15, které by následný filtr odmítl i jako kandidáty.
+PaddleX nadále provádí vlastní crop, orientaci a recognition. Malý adaptér jeho
+crop fáze používá připnutou verzi 3.6.1; pořadí boxů ověřuje unit test.
 
-PaddleOCR 3.6.0 odmítá původně nastavené `PP-OCRv6`; jeho podporované generace
-jsou v3/v4/v5. Čeština patří do Latin modelu v5. Ověřeno v
-[oficiálním zdrojovém kódu verze 3.6.0](https://github.com/PaddlePaddle/PaddleOCR/blob/v3.6.0/paddleocr/_pipelines/ocr.py).
-Mobilní detektor je součástí
-[oficiálních PP-OCRv5 modelů](https://paddlepaddle.github.io/PaddleOCR/main/en/version3.x/module_usage/text_detection.html).
+Sousední části titulu se spojují jen pokud jsou blízko, souhlasí orientace a
+velikost písma, jednotlivě nejsou accepted, míří ke stejnému názvu a spojený text
+splní plný matcher včetně marginu. Tím se opravuje `Kniha` + `a proměn` bez
+snížení matching thresholdů nebo obecného přijímání neúplných názvů.
+Identita stále vzniká pouze z textu názvu; síla, suit, ilustrace ani pravidla
+se k identifikaci nepoužívají. Algoritmus neobsahuje názvy testovacích souborů,
+očekávané sestavy ani limit sedmi detekcí.
 
-## Výsledky pro každý obrázek
+## Výsledky pro každou fotografii
 
-**test fixtures missing**
-
-Prohledán byl výhradně `backend/tests/fixtures/scans/`; obsahuje pouze
-`.gitkeep`. Následující počet expected vychází z dodaného ground truth,
-nikoli z provedených OCR měření.
+Všechny názvy níže jsou v `scans/foto/`. Časy měřila skutečná API implementace
+po nasazení, požadavky probíhaly sekvenčně přes LAN adresu.
 
 | image | expected | correct | missed | false positive | processing ms |
-| --- | ---: | --- | --- | --- | --- |
-| IMG_5707.jpeg | 7 | N/A | N/A | N/A | N/A |
-| IMG_5708.jpeg | 7 | N/A | N/A | N/A | N/A |
-| IMG_5709.jpeg | 7 | N/A | N/A | N/A | N/A |
-| IMG_5710.jpeg | 7 | N/A | N/A | N/A | N/A |
-| IMG_5711.jpeg | 7 | N/A | N/A | N/A | N/A |
-| IMG_5712.jpeg | 7 | N/A | N/A | N/A | N/A |
-| IMG_5713.jpeg | 7 | N/A | N/A | N/A | N/A |
-| IMG_5714.jpeg | 7 | N/A | N/A | N/A | N/A |
-| IMG_5715.jpeg | 7 | N/A | N/A | N/A | N/A |
-| IMG_5716.jpeg | 7 | N/A | N/A | N/A | N/A |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| ChatGPT Image Oct 27, 2026, 07_21_40 PM.jpg | 7 | 7 | 0 | 0 | 750 |
+| ChatGPT Image Oct 27, 2026, 07_21_48 PM.jpg | 7 | 7 | 0 | 0 | 874 |
+| ChatGPT Image Oct 27, 2026, 07_21_55 PM.jpg | 7 | 7 | 0 | 0 | 894 |
+| ChatGPT Image Oct 27, 2026, 07_22_03 PM.jpg | 7 | 7 | 0 | 0 | 970 |
+| ChatGPT Image Oct 27, 2026, 07_22_10 PM.jpg | 7 | 7 | 0 | 0 | 1120 |
+| ChatGPT Image Oct 27, 2026, 07_22_19 PM.jpg | 7 | 7 | 0 | 0 | 623 |
+| ChatGPT Image Oct 27, 2026, 07_22_27 PM.jpg | 7 | 7 | 0 | 0 | 508 |
+| ChatGPT Image Oct 27, 2026, 07_22_35 PM.jpg | 7 | 7 | 0 | 0 | 609 |
+| ChatGPT Image Oct 27, 2026, 07_22_42 PM.jpg | 7 | 7 | 0 | 0 | 514 |
+| ChatGPT Image Oct 27, 2026, 07_22_49 PM.jpg | 7 | 7 | 0 | 0 | 893 |
 
-## Souhrn reálného datasetu
+## Výsledky pro každou předlohu
 
-```text
-images listed in ground truth: 10
-cards listed in ground truth: 70
-images tested: 0
-expected cards in tested images: 0
-correct: N/A (not measured)
-false negatives: N/A (not measured)
-false positives: N/A (not measured)
-recall: N/A
-precision: N/A
-avg processing time: N/A
-p95 processing time: N/A
-```
+Názvy jsou v `scans/originaly/`. Devět přijatých karet na obrázek zároveň
+potvrzuje, že backend po sedmé kartě nepřestává detekovat.
 
-`evaluate_fixtures.py --output backend/fixture-results.json` správně skončil
-s exit code 2, vypsal všech deset chybějících souborů a `null` pro procenta
-a časy. Nula dostupných snímků se nevydává za úspěšný regresní test.
+| image | expected | correct | missed | false positive | processing ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| ChatGPT Image Oct 26, 2026, 07_56_37 PM-1.png | 9 | 9 | 0 | 0 | 1097 |
+| ChatGPT Image Oct 26, 2026, 07_56_38 PM-2.png | 9 | 9 | 0 | 0 | 1006 |
+| ChatGPT Image Oct 26, 2026, 07_56_39 PM-3.png | 9 | 9 | 0 | 0 | 1299 |
+| ChatGPT Image Oct 26, 2026, 07_56_40 PM-4.png | 9 | 9 | 0 | 0 | 1254 |
+| ChatGPT Image Oct 26, 2026, 07_56_40 PM-5.png | 9 | 9 | 0 | 0 | 1159 |
+| ChatGPT Image Oct 26, 2026, 07_56_41 PM-6.png | 9 | 9 | 0 | 0 | 1306 |
 
-## Syntetický smoke test a výkon
+## Souhrn
 
-Snímek 1280×720, JPEG 80 %, vznikl pouze v paměti: bílý text `Kralovna` na
-tmavém pásu a černý text `Drak` na světlé ploše pravidel. Všechny průchody
-přijaly pouze FR32, i když raw OCR přečetlo také `Drak`. Finální skóre titulku
-bylo 0.8200 proti 0.0318 pro text pravidel. OCR confidence obou textů bylo
-přibližně 0.9998–0.9999. Matcher Královny vracel úplnou shodu a bezpečný náskok.
+| Metrika | Fotografie | Předlohy | Celkem |
+| --- | ---: | ---: | ---: |
+| images tested | 10 | 6 | 16 |
+| expected cards | 70 | 54 | 124 |
+| correct | 70 | 54 | 124 |
+| false negatives | 0 | 0 | 0 |
+| false positives | 0 | 0 | 0 |
+| recall | 100 % | 100 % | 100 % |
+| precision | 100 % | 100 % | 100 % |
+| avg processing ms | 775.5 | 1186.8 | 929.8 |
+| p95 processing ms | 1120 | 1306 | 1306 |
 
-| Konfigurace | První průchod | Další průchody | Průměr | p95 (nearest rank) |
-| --- | ---: | --- | ---: | ---: |
-| server detector, rotace 0/−22/+22 | 9349 ms | 9149, 9046 ms | 9181.3 ms | 9349 ms |
-| mobile detector, rotace 0 | 273 ms | 164, 153 ms | 196.7 ms | 273 ms |
-| mobile detector po restartu | 258 ms | 164, 153 ms | 191.7 ms | 258 ms |
+P95 je nearest-rank percentil. U deseti fotografií je tedy p95 maximum.
+CSV/JSON ekvivalent s expected/detected/missed pro každý obrázek je v
+[OCR_RESULTS.json](OCR_RESULTS.json). Evaluator skončil exit code 0, bez
+chybějících souborů a bez HTTP chyb.
 
-Změnil se detektor i počet průchodů, proto nelze z tohoto měření odděleně
-vyčíslit přínos každé změny. Finální konfigurace byla zvolena jako konzervativní
-CPU baseline se změřenou syntetickou latencí. **Vliv na recall a natočené
-reálné karty není změřen.** Tyto časy také neudávají latenci reálné sedmikaretní
-ruky ani browser/network latenci. Runtime po syntetické inference spotřebovával
-řádově stovky MiB; limit je 4 GiB. Serveru zůstávalo přibližně 24 GiB available.
+Jde o backend `accepted` výsledky nad statickými obrázky. Fyzický kamerový
+workflow ani frontend temporal confirmation tímto testem nejsou měřeny.
 
-Reprodukovatelný vstup vytváří [scripts/smoke_ocr.py](scripts/smoke_ocr.py).
-Naměřené texty, boxy a časy bez obrazových dat obsahuje
-[smoke-results.json](smoke-results.json).
+## Porovnání variant a nalezené chyby
 
-## Restart a model cache
+Výchozí nasazená verze před tímto laděním měla na stejných ručně přečtených
+fotografiích 67/70, recall 95.7 %, precision 100 %, průměr 673.2 ms.
+Předlohy měla 54/54. Chyběly Kniha proměn (detektor rozdělil název),
+Elementál ohně (natočený titulek) a Sběratel (téměř svislá karta).
 
-Řízený restart vlastní service prošel. Log po restartu u všech tří aktivních
-modelů uvádí `Using cached files`; žádné modely se znovu nestahovaly.
-Metadata cache před a po restartu jsou totožná: 84 souborů, 108 381 083 bytů,
-SHA-256 serializovaných cest/velikostí/mtime
-`6dddb8c0362b170ffdca77935725ac5c05eda19f0effcde146b4e1f3b16bc208`.
-Cache obsahuje i serverový detektor z prvního porovnání, který se již nepoužívá.
-Žádný volume ani model nebyl kvůli úklidu mazán. Následná skutečná inference
-po restartu také prošla.
+| Varianta, deset fotografií | Correct | False + | Avg ms |
+| --- | ---: | ---: | ---: |
+| původní jeden průchod | 67/70 | 0 | 673.2 |
+| spojení fragmentů, jeden průchod | 68/70 | 0 | 717.4 |
+| spojení fragmentů, 0/−15°, původní detektor resolution | 70/70 | 0 | 1572.0 |
+| totéž + vyřazení cropů před recognition | 70/70 | 0 | 1450.9 |
+| detector max 960, původní box threshold 0.60 | 69/70 | 0 | 653.7 |
+| finální detector max 960, box threshold 0.50, HTTP API | 70/70 | 0 | 775.5 |
 
-## Testy a kontrola frontendu
+Na třech problematických snímcích byly samostatně vyzkoušeny i úhly ±15,
+±22, ±30 a 90 stupňů. Kombinace 0/−22/+22 by pokryla všechny tři, ale měla
+přibližně 3 s na snímek. Spojení fragmentů a 0/−15° pokrývá celý dataset ve
+dvou průchodech; další rotace proto nebyly přidány. Všechny experimenty běžely
+sekvenčně, bez stress testu a bez navyšování CPU threadů.
 
-- Finální Docker test stage: **21 passed**, bez warningů.
-- Testy pokrývají všechny úplné názvy FR01–FR54, blízké názvy, odmítnutí
-  společných fragmentů a povinný margin i při vysokém skóre.
-- API testy ověřují 54 karet, PWA entrypoints, cache hlavičky, neplatné vstupy,
-  limit známého i streamovaného uploadu a 429 místo čekajícího OCR požadavku.
-- Metriky mají testy na false positives, false negatives, kandidáty,
-  prázdný dataset a chybu HTTP požadavku.
-- Node 22 build stage: `node --check` pro scanner, app, config i service worker.
-- `docker compose config`, přesně jedna service, `bash -n scripts/start-lan.sh`
-  a `git diff --check` prošly.
-- Statická kontrola: frontend odesílá snímky sekvenčně. Overlay používá
-  `max(displayWidth/videoWidth, displayHeight/videoHeight)` a středový posun,
-  což odpovídá `object-fit: cover` pro portrait i landscape poměry.
-- Přidávání prochází `hand.addCard()`; scanner se po sedmé kartě nezastavuje.
-  Existující engine nadále povoluje osmou kartu podle Nekromanta.
-- Existující temporal tracking potvrzuje velmi vysokou confidence jedním
-  framem, střední dvěma; cooldown odstranění je osm sekund. Jeho thresholdy
-  se bez reálných fotografií neměnily. Efekty speciálních karet nastavuje hráč.
-- Skutečný browser/kamera workflow a přesnost boxů na fyzickém iPhonu
-  nebyly otestovány. HTTP LAN adresa nepovolí `getUserMedia` jako HTTPS origin;
-  upload fotografií a API lze testovat nyní.
+### Rozlišení a JPEG
+
+Následující simulace používá OpenCV resize/JPEG a finální OCR. U `max1600`
+má zdroj stále 1536 px; větší se nedopočítává. Limit 1920 by na těchto stejných
+zdrojích vytvořil totožný snímek jako 1600, proto se neuvádí jako další nezávislé
+měření. Skutečný nativní kamerový vstup 1920 px zde není k dispozici.
+
+| Max side / JPEG | Correct | False + | Avg ms | p95 ms | Mean payload KiB |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| max1280-jpeg70 | 69/70 | 0 | 740.9 | 1065 | 264.5 |
+| max1280-jpeg78 | 69/70 | 0 | 764.2 | 1044 | 311.3 |
+| max1280-jpeg80 | 68/70 | 0 | 764.9 | 1078 | 325.1 |
+| max1280-jpeg90 | 70/70 | 0 | 755.2 | 1072 | 460.6 |
+| max1600-jpeg70 | 68/70 | 0 | 762.2 | 1100 | 407.7 |
+| max1600-jpeg78 | 69/70 | 0 | 776.1 | 1108 | 481.7 |
+| max1600-jpeg80 | 67/70 | 0 | 766.1 | 1064 | 502.3 |
+| max1600-jpeg90 | 69/70 | 0 | 798.8 | 1097 | 723.6 |
+
+Frontend byl změněn na 1280/0.90: jediná z porovnaných komprimovaných variant
+zachovala na všech fotografiích 7/7 a měla přibližně 472 KiB místo přibližně
+940 KiB původních JPG. Tato simulace neověřuje přesný enkodér iOS canvasu;
+živá kamera zůstává následným fyzickým testem.
+
+## Testy, restart a kontrola frontendu
+
+- Docker test stage: **29 passed**; matcher, API, metriky, ověření hashů,
+  spojování fragmentů, odmítnutí vzdálených/nesouvisejících titulů, crop pořadí
+  a souřadnice po rotaci.
+- Node 22 build stage: syntax scanner.js, app.js, config.js a service-worker.js.
+- `docker compose config`, `bash -n scripts/start-lan.sh`, `git diff --check`.
+- PWA soubory včetně nových hodnot 1280/0.90 se skutečně servírují. Service
+  worker cache byla zvýšena na v6. API se do ní neukládá.
+- Restartován byl pouze vlastní kontejner. Všechny tři modely použily cached
+  files bez stahování; metadata cache před/po jsou totožná: 84 souborů,
+  108 381 083 bytů, SHA-256 cest/velikostí/mtime
+  `6dddb8c0362b170ffdca77935725ac5c05eda19f0effcde146b4e1f3b16bc208`.
+- Po restartu znovu prošel health i skutečná první fotografie se 7/7 (729 ms).
+- Scoring engine zůstává původní. Přidávání používá `hand.addCard()` a
+  `hand.limit()`; efekty speciálních karet nastavuje hráč. Scanner posílá
+  framy sériově. Historické temporal thresholds a osmivteřinový cooldown se
+  neměnily; nad skutečným videem zatím nebyly kalibrovány.
+- Mapování overlay pro `object-fit: cover` zůstává zachováno. Unit test nyní
+  ověřuje zpětnou transformaci normalizovaných boxů pro 0, −15, 22 a 90°.
 
 ## Co bylo změněno
 
-1. Dvě runtime services nahrazeny jedinou FastAPI/PWA aplikací, kořenovým
-   Dockerfile a pevně omezeným LAN mappingem 18080→8000.
-2. Nová projektová network/cache, konzervativní resource limity a read-only
-   preflight skript, který při konfliktu nic nezastavuje.
-3. Kompatibilní PP-OCRv5 a menší CPU detektor s jedním změřeným průchodem.
-4. Opraven matcher: úplné názvy místo substring skóre a povinný match margin.
-5. Limit uploadu se kontroluje už během čtení; doba uploadu je omezená na 15 s,
-   Compose nastavuje limit dekódování 25 milionů pixelů. Souběžný OCR požadavek
-   se odmítá 429; API se neukládá do cache.
-6. HTML načítá `js/config.js`; nepoužívaný externí Tesseract.js byl odebrán.
-7. Rozšířené metriky/regresní nástroj bez hostitelských závislostí, unit/API
-   testy, syntetický smoke test a dokumentace. CI workflow zůstává původní.
+1. Nový ground truth přímo z přečtených 16 obrázků; oddělené photo/original
+   metriky a kontrola shody konkrétních souborů pomocí SHA-256.
+2. Geometrické spojení rozděleného titulku bez oslabení matcheru.
+3. Naměřené dva OCR průchody, detector max 960 / box threshold 0.50 a
+   vyřazování nevhodných cropů před recognition; připnutý PaddleX 3.6.1.
+4. Frontend 1280 px / JPEG 0.90 a cache v6 podle kompresního porovnání.
+5. Ochrana celého `testovaci-data/`, fixtures a lokálních debug měření před
+   Gitem a Docker build contextem; aktualizovaný report a dokumentace.
 
 ## Isolation verification
 
-Aktuální přímý pokyn uživatele výslovně povolil hostitelský port 18080 a tím
-nahradil starší zákaz všech host bindings v přiložených omezeních. Proto se
-Published host ports pravdivě uvádí jako autorizovaný LAN binding, nikoli NONE.
-Položky Existing containers níže označují aplikace existující před touto prací.
+Hostitelský port 18080 byl výslovně povolen aktuálním zadáním. Před každou
+aktualizací/restartem byly ověřeny přesné ID našeho kontejneru, Compose workspace,
+Docker binding a `ss`. Žádný cizí proces na portu se nezastavoval. Položky
+Existing containers níže označují ostatní aplikace serveru.
 
 ```text
 Workspace used: /home/postulka/deploy/tajuplne-rise
-Container created: tajuplne-rise-remastered-ocr
-Docker network created: tajuplne-rise-remastered-internal
-Docker volume created: tajuplne-rise-remastered-paddle-cache
-Published host ports: 192.168.0.249:18080/tcp -> container 8000/tcp (explicitly authorized)
+Container created/updated: tajuplne-rise-remastered-ocr
+Docker network used: tajuplne-rise-remastered-internal (own project only)
+Docker volume used: tajuplne-rise-remastered-paddle-cache (own project only)
+Published host ports: 192.168.0.249:18080/tcp -> container 8000/tcp (authorized)
 Existing containers restarted: NONE
 Existing containers stopped: NONE
 Existing containers modified: NONE
 Host packages installed: NONE
 System configuration modified: NONE
 Files modified outside project workspace: NONE
-Reverse proxy / Caddy modified: NONE
-DNS / HTTPS / firewall modified: NONE
+Caddy / DNS / HTTPS / firewall modified: NONE
 Foreign networks / volumes used: NONE
-Private photographs committed, uploaded externally or included in image: NONE
+Private photographs committed or included in image: NONE
+External OCR API used: NONE
 ```
 
-Vlastní Docker network obsahuje jen náš kontejner; nejsou připojeny žádné
-cizí volumes, host bind mounts ani Docker socket. Docker build context vylučuje
-**celý** soukromý adresář scans bez ohledu na příponu. Debug ukládání zůstává false.
+## Známé problémy a další kroky
 
-## Známé problémy a doporučené další kroky
+- Na tomto datasetu nezůstala chybná ani chybějící detekce. Stejný dataset byl
+  použit pro ladění; pro ověření zobecnitelnosti je potřeba další nezávislá sada
+  odlesků, rozmazání, jiných úhlů a osvětlení. Nelze zaručit 100 % na všech scénách.
+- Průměr fotografií je pod 1 s, ale 500ms cíl není obecně dosažen. Nejpomalejší
+  fotografie má 1120 ms a devítikaretní předlohy přibližně 1.0–1.3 s.
+- Změřit skutečné video, iOS JPEG enkodér, temporal tracking a boxy na telefonu.
+  Kamera vyžaduje HTTPS; tato fáze nadále poskytuje pouze LAN HTTP pro testy
+  uploadu a API. Caddy, DNS ani TLS se nekonfigurovaly.
+- Budoucí změna PaddleX musí ověřit adapter crop fáze i kompletní regresi.
+  Pro diagnostiku celých pravidel lze dočasně vypnout TITLE_PREFILTER;
+  DEBUG_SAVE_FAILED_SCANS zůstává false.
 
-1. Doplnit pouze do `backend/tests/fixtures/scans/` soubory IMG_5707–IMG_5716.
-   Spustit sekvenční evaluator proti LAN URL a doplnit reálné výsledky do reportu.
-   Bez toho nelze rozhodnout o splnění 6/7, false positives ani live výkonu.
-2. Nad těmito snímky porovnat mobile/server detector, rotace a vstupní rozlišení.
-   Zejména natočení, odlesk, zakrytí a malé titulky mohou změnit recall.
-   Přínos manuálních rotací vůči text-line orientation zatím není ověřený.
-3. Teprve podle reálných false positives/negatives ladit title filtering,
-   matcher, JPEG kvalitu a temporal thresholds. Nedělat závěr z jednoho
-   jednoduchého syntetického titulku.
-4. Po samostatném schválení HTTPS integrace fyzicky otestovat kameru, boxy,
-   přidávání osmé karty a ruční odstranění na iPhonu. Reverse proxy může
-   směřovat na LAN port 18080; v této práci nebyla nakonfigurována.
-
-Práce probíhá pouze na `feature/self-hosted-ocr`; master ani PR #4 se nemerguje.
+Pracovní větev je pouze `feature/self-hosted-ocr`. Master ani PR #4 se nemerguje.

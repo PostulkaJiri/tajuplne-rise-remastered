@@ -75,21 +75,27 @@ Tělo obsahuje přímo JPEG, PNG nebo WebP, nikoli cestu k souboru.
 Odpověď obsahuje `processingMs`, `cards`, `candidates`; každá karta má FR ID,
 název, `ocrText`, `ocrConfidence`, `matchConfidence`, `secondMatchConfidence`,
 `matchMargin`, `titleConfidence`, `combinedConfidence`, `accepted` a box
-`{x0,y0,x1,y1}` normalizovaný do rozsahu 0–1. Debug přidává raw texty a rotace.
+`{x0,y0,x1,y1}` normalizovaný do rozsahu 0–1. Debug přidává rozpoznané texty a rotace. S prefilterem se světlé oblasti pravidel vůbec nerozpoznávají; pro diagnostiku celého textu lze dočasně vypnout `TITLE_PREFILTER`.
 
 Úplný titul se porovnává se všemi 54 názvy. I velmi vysoké skóre musí splnit
 minimální náskok před druhou shodou; samotný fragment jako „Elementál“ nestačí.
 Automatické přijetí dále vyžaduje OCR confidence a title-style threshold.
 
 Viz `.env.example`: čeština `cs`, `PP-OCRv5`, CPU, dva thready,
-`SCAN_ROTATIONS=0`, matching 78 / high 92 / margin 7,
+`SCAN_ROTATIONS=0,-15`, matching 78 / high 92 / margin 7,
 `MIN_OCR_SCORE=0.32`, `MIN_TITLE_STYLE=0.30`. PaddleOCR 3.6.0 nepodporuje
 `PP-OCRv6`; používáme jeho podporovanou latin PP-OCRv5 konfiguraci.
 Explicitní modely jsou `PP-OCRv5_mobile_det` a `latin_PP-OCRv5_mobile_rec`.
-Jeden průchod byl zvolen po syntetickém porovnání latence s původním serverovým
-detektorem a třemi rotacemi; přesnost na fotografiích a vliv odebraných rotací
-zatím nejsou změřené. Frontend zachovává 1600 px a JPEG kvalitu 0.78.
-Před přidáním rotací porovnej na reálných fixtures recall a latenci.
+Detektor má limit 960 px (typ `max`) a práh boxu 0.50. Recognition čte
+výřezy v plném rozlišení; zjevné netitulkové oblasti se pomocí
+`TITLE_PREFILTER=true` vyřadí před rozpoznáváním. Integrace používá připnutý
+PaddleX 3.6.1. Sousední části stejného rozděleného titulku se spojují jen při
+shodné orientaci, blízké poloze a jednoznačné shodě celého spojeného názvu.
+
+Dva průchody 0/−15° byly zvoleny podle skutečných snímků: opravují natočený
+Elementál ohně a téměř svislý Sběratel. Frontend po měření používá nejvýše
+1280 px a JPEG kvalitu 0.90. Testované menší JPEG kvality ztrácely některé
+čitelné titulky. Výsledky všech porovnání jsou v OCR reportu.
 
 API omezuje upload na 8 000 000 bytů i při streamování, dobu uploadu na 15 s
 a dekódování v tomto deploymentu na 25 milionů pixelů. OCR zpracovává jeden požadavek; další
@@ -102,8 +108,20 @@ sekvenčně. API odpovědi se neukládají do PWA cache.
 ladění explicitně zapne, neúspěšné snímky skončí pouze v zapisovatelné vrstvě
 vlastního kontejneru v `/tmp/tajuplne-rise-scans`, bez sdíleného volume.
 
+Nový ground truth byl ručně přečten přímo z 16 dodaných snímků: deset
+fotografií se 70 čitelnými názvy a šest předloh se všemi 54 kartami.
+Obsahuje SHA-256 každého souboru; staré IMG názvy se nepoužívají.
+
 Soukromé fotografie patří výhradně do `backend/tests/fixtures/scans/`.
-Celý adresář je vyloučen z Gitu i Docker build kontextu. Snímky se nesmí
+Tento adresář i uživatelský zdroj `testovaci-data/` jsou vyloučeny z Gitu
+i Docker build kontextu. Na tomto serveru jsou kopie v podadresářích `foto/`
+a `originaly/`. Pro opakované nasazení lze snímky lokálně importovat příkazem:
+
+```bash
+cp -a testovaci-data/foto testovaci-data/originaly backend/tests/fixtures/scans/
+```
+
+Snímky se nesmí
 commitovat, zahrnovat do image ani posílat na externí OCR služby.
 
 Regresní nástroj používá pouze standardní knihovnu Pythonu, nic neinstaluje:
@@ -112,10 +130,14 @@ Regresní nástroj používá pouze standardní knihovnu Pythonu, nic neinstaluj
 python3 backend/scripts/evaluate_fixtures.py \
   --api http://192.168.0.249:18080/api/v1/scan \
   --output backend/fixture-results.json
+# Volitelně pouze fotografie nebo předlohy:
+python3 backend/scripts/evaluate_fixtures.py --group photo
+python3 backend/scripts/evaluate_fixtures.py --group original
 ```
 
 Postupuje sekvenčně. Vypíše expected/detected/correct, false negatives,
-false positives, serverový i celkový čas pro každý dostupný obrázek, souhrnný
+false positives, serverový i celkový čas pro každý dostupný obrázek, oddělené
+metriky fotografií/předloh a souhrnný
 recall, precision, průměr a p95. Chybějící obrázky vypíše; při nulovém počtu
 měření vrací metriky `null` a exit code 2. Částečný dataset nebo nesplněné
 minimum 6/7 s nulou false positives vrací 1. Úspěšný kompletní dataset vrací 0.
