@@ -8,6 +8,20 @@ RUN node --check js/scanner.js \
     && node --check service-worker.js \
     && touch /javascript-validated
 
+FROM node:22-alpine AS ui-tests
+WORKDIR /ui
+RUN apk add --no-cache chromium font-noto \
+    && npm install --no-save playwright-core@1.56.1
+COPY index.html manifest.webmanifest service-worker.js /ui/
+COPY js /ui/js
+COPY css /ui/css
+COPY icons /ui/icons
+COPY frontend/tests /ui/frontend/tests
+RUN mkdir /ui-artifacts && node frontend/tests/mobile.test.cjs
+
+FROM scratch AS ui-artifacts
+COPY --from=ui-tests /ui-artifacts /
+
 FROM python:3.11-slim AS runtime-base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

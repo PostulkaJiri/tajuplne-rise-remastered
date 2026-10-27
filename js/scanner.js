@@ -41,25 +41,43 @@ function findBest(text){
   return best
 }
 async function startCamera(video){
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error("Tento prohlížeč nepodporuje přímý přístup ke kameře.");
+  if(!window.isSecureContext)throw new Error("Živá kamera vyžaduje HTTPS.");
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error("Živý náhled není v tomto prohlížeči dostupný.");
+  video.muted=true;video.playsInline=true;
   var stream=await navigator.mediaDevices.getUserMedia({
     audio:false,
     video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}}
   });
-  video.srcObject=stream;await video.play();return stream
+  try{video.srcObject=stream;await video.play();return stream}
+  catch(error){stream.getTracks().forEach(function(track){track.stop()});video.srcObject=null;throw error}
 }
 function stopCamera(video){
   var stream=video.srcObject;if(stream)stream.getTracks().forEach(function(track){track.stop()});video.srcObject=null
 }
 function sourceCanvas(source){
   if(source instanceof HTMLCanvasElement)return source;
+  if(source instanceof HTMLImageElement){
+    if(!source.naturalWidth||!source.naturalHeight)throw new Error("Fotografie ještě není načtená.");
+    var imageScale=Math.min(1,FRAME_MAX_DIM/Math.max(source.naturalWidth,source.naturalHeight));
+    var photoCanvas=document.createElement("canvas");
+    photoCanvas.width=Math.max(1,Math.round(source.naturalWidth*imageScale));
+    photoCanvas.height=Math.max(1,Math.round(source.naturalHeight*imageScale));
+    photoCanvas.getContext("2d",{alpha:false}).drawImage(source,0,0,photoCanvas.width,photoCanvas.height);
+    return photoCanvas
+  }
   if(source instanceof HTMLVideoElement){
     if(!source.videoWidth||!source.videoHeight)throw new Error("Kamera ještě nemá obraz.");
-    var scale=Math.min(1,FRAME_MAX_DIM/Math.max(source.videoWidth,source.videoHeight));
+    // Analyze exactly the center-cropped area visible in the camera panel.
+    var rect=source.getBoundingClientRect();
+    var viewWidth=rect.width||source.videoWidth,viewHeight=rect.height||source.videoHeight;
+    var cover=Math.max(viewWidth/source.videoWidth,viewHeight/source.videoHeight);
+    var cropWidth=viewWidth/cover,cropHeight=viewHeight/cover;
+    var sx=(source.videoWidth-cropWidth)/2,sy=(source.videoHeight-cropHeight)/2;
+    var scale=Math.min(1,FRAME_MAX_DIM/Math.max(cropWidth,cropHeight));
     var canvas=document.createElement("canvas");
-    canvas.width=Math.max(1,Math.round(source.videoWidth*scale));
-    canvas.height=Math.max(1,Math.round(source.videoHeight*scale));
-    canvas.getContext("2d",{alpha:false}).drawImage(source,0,0,canvas.width,canvas.height);
+    canvas.width=Math.max(1,Math.round(cropWidth*scale));
+    canvas.height=Math.max(1,Math.round(cropHeight*scale));
+    canvas.getContext("2d",{alpha:false}).drawImage(source,sx,sy,cropWidth,cropHeight,0,0,canvas.width,canvas.height);
     return canvas
   }
   throw new Error("Nepodporovaný obrazový zdroj.")
@@ -131,13 +149,17 @@ function createLiveScanner(video,handlers){
   var running=true,controller=new AbortController(),tracks={},pass=0;
 
   async function loop(){
+    while(running){
     try{
       if(handlers.onStatus)handlers.onStatus({state:"loading",message:"Připojuji OCR server…"});
       var health=await checkHealth(controller.signal);
-      if(handlers.onStatus)handlers.onStatus({state:"running",message:"OCR server: "+(health.ocr||"online")+" · "+(health.lang||"cs")})
+      if(handlers.onStatus)handlers.onStatus({state:"running",message:"OCR server: "+(health.ocr||"online")+" · "+(health.lang||"cs")});
+      break
     }catch(e){
-      if(running&&handlers.onError)handlers.onError(e);
-      return
+      if(!running||e.name==="AbortError")return;
+      if(handlers.onError)handlers.onError(e);
+      await new Promise(function(resolve){setTimeout(resolve,900)})
+    }
     }
 
     while(running){
@@ -146,13 +168,15 @@ function createLiveScanner(video,handlers){
       }
       var started=performance.now();
       try{
-        var blob=await canvasToBlob(sourceCanvas(video));
+        var frame=sourceCanvas(video);
+        var blob=await canvasToBlob(frame);
         var result=await scanBlob(blob,controller.signal,false);
         if(!running)break;
         var now=Date.now();
         mergeTracks(tracks,(result.cards||[]).map(toDetection),now);
         pass++;
         if(handlers.onUpdate)handlers.onUpdate({
+          frame:frame,observedAt:now,
           detections:visibleTracks(tracks,now),
           candidates:(result.candidates||[]).map(toCandidate).slice(0,8),
           pass:pass,processingMs:Number(result.processingMs)||0,
