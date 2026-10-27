@@ -3,6 +3,9 @@
 .github
 **/__pycache__
 **/*.pyc
-backend/tests/fixtures/scans/*.jpg
-backend/tests/fixtures/scans/*.jpeg
-backend/tests/fixtures/scans/*.png
+backend/tests/fixtures/scans/**
+.env
+.pytest_cache
+backend/OCR_REPORT.md
+backend/fixture-results.json
+*.log

@@ -26,7 +26,7 @@ def _env_int(name: str, default: int) -> int:
 
 
 def _rotations() -> tuple[float, ...]:
-    raw = os.getenv("SCAN_ROTATIONS", "0,-22,22")
+    raw = os.getenv("SCAN_ROTATIONS", "0")
     values: list[float] = []
     for item in raw.split(","):
         item = item.strip()
@@ -42,9 +42,11 @@ def _rotations() -> tuple[float, ...]:
 @dataclass(frozen=True)
 class Settings:
     ocr_lang: str = os.getenv("PADDLE_OCR_LANG", "cs")
-    ocr_version: str = os.getenv("PADDLE_OCR_VERSION", "PP-OCRv6")
+    ocr_version: str = os.getenv("PADDLE_OCR_VERSION", "PP-OCRv5")
+    detection_model: str = os.getenv("PADDLE_DETECTION_MODEL", "PP-OCRv5_mobile_det")
+    recognition_model: str = os.getenv("PADDLE_RECOGNITION_MODEL", "latin_PP-OCRv5_mobile_rec")
     paddle_device: str = os.getenv("PADDLE_DEVICE", "cpu")
-    cpu_threads: int = _env_int("PADDLE_CPU_THREADS", 6)
+    cpu_threads: int = _env_int("PADDLE_CPU_THREADS", 2)
     rotations: tuple[float, ...] = _rotations()
 
     match_accept_score: float = _env_float("MATCH_ACCEPT_SCORE", 78.0)

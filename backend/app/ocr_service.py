@@ -151,8 +151,8 @@ class OcrService:
         )
 
         self.ocr = PaddleOCR(
-            lang=settings.ocr_lang,
-            ocr_version=settings.ocr_version,
+            text_detection_model_name=settings.detection_model,
+            text_recognition_model_name=settings.recognition_model,
             use_doc_orientation_classify=False,
             use_doc_unwarping=False,
             use_textline_orientation=True,
