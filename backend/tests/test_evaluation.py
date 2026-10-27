@@ -37,3 +37,28 @@ def test_failed_request_is_reported_separately():
     summary = evaluation.summarize([{"error": "timeout"}])
     assert summary["imagesFailed"] == 1
     assert summary["imagesTested"] == 0
+
+
+def test_evaluator_rejects_fixture_that_differs_from_manual_labels(tmp_path):
+    import json
+    (tmp_path / 'scans').mkdir()
+    (tmp_path / 'scans' / 'changed.jpg').write_bytes(b'changed image bytes')
+    (tmp_path / 'ground_truth.json').write_text(json.dumps([
+        {'image':'changed.jpg','group':'photo','expected':['Král'],'sha256':'0'*64}
+    ]))
+    output=tmp_path/'result.json'
+    assert evaluation.main(['--fixtures',str(tmp_path),'--output',str(output)])==2
+    report=json.loads(output.read_text())
+    assert report['summary']['imagesFailed']==1
+    assert 'SHA-256 mismatch' in report['results'][0]['error']
+
+
+def test_group_selection_does_not_mix_photos_and_originals(tmp_path):
+    import json
+    (tmp_path / 'ground_truth.json').write_text(json.dumps([
+        {'image':'photo.jpg','group':'photo','expected':['Král']},
+        {'image':'original.png','group':'original','expected':['Královna']},
+    ]))
+    output=tmp_path/'result.json'
+    assert evaluation.main(['--fixtures',str(tmp_path),'--group','photo','--output',str(output)])==2
+    assert json.loads(output.read_text())['missingImages']==['photo.jpg']

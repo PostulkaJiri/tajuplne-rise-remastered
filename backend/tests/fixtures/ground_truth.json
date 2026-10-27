@@ -1,102 +1,7 @@
 [
   {
-    "image": "IMG_5707.jpeg",
-    "expected": [
-      "Bojová vzducholoď",
-      "Elementál vody",
-      "Kouř",
-      "Nekromant",
-      "Elfský luk",
-      "Těžká jízda",
-      "Tornádo"
-    ]
-  },
-  {
-    "image": "IMG_5708.jpeg",
-    "expected": [
-      "Bojová vzducholoď",
-      "Elementál vody",
-      "Kouř",
-      "Nekromant",
-      "Elfský luk",
-      "Těžká jízda",
-      "Tornádo"
-    ]
-  },
-  {
-    "image": "IMG_5709.jpeg",
-    "expected": [
-      "Nejvyšší mág",
-      "Drak",
-      "Elementál ohně",
-      "Zvonice",
-      "Kethský štít",
-      "Jednorožec",
-      "Bouře"
-    ]
-  },
-  {
-    "image": "IMG_5710.jpeg",
-    "expected": [
-      "Válečná loď",
-      "Šašek",
-      "Magická hůl",
-      "Kethský meč",
-      "Les",
-      "Pán šelem",
-      "Požár"
-    ]
-  },
-  {
-    "image": "IMG_5711.jpeg",
-    "expected": [
-      "Ostrov",
-      "Hora",
-      "Blesk",
-      "Svíčka",
-      "Elementál země",
-      "Velitel",
-      "Hydra"
-    ]
-  },
-  {
-    "image": "IMG_5712.jpeg",
-    "expected": [
-      "Král",
-      "Stoletá voda",
-      "Fontána života",
-      "Sběratel",
-      "Rytířky",
-      "Elfí lučištníci",
-      "Bažina"
-    ]
-  },
-  {
-    "image": "IMG_5713.jpeg",
-    "expected": [
-      "Hraničáři",
-      "Princezna",
-      "Kouzelnice",
-      "Přelud",
-      "Jeskyně",
-      "Císařovna",
-      "Válečný oř"
-    ]
-  },
-  {
-    "image": "IMG_5714.jpeg",
-    "expected": [
-      "Elementál vzduchu",
-      "Dvojník",
-      "Strom světa",
-      "Bazilišek",
-      "Sněhová vánice",
-      "Trpasličí pěchota",
-      "Ochranná runa"
-    ]
-  },
-  {
-    "image": "IMG_5715.jpeg",
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_21_40 PM.jpg",
+    "group": "photo",
     "expected": [
       "Elementál vzduchu",
       "Dvojník",
@@ -105,10 +10,134 @@
       "Kovárna",
       "Královna",
       "Kniha proměn"
-    ]
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "83176220e83a49d59e4c1b76395bb315febdb31a89c59cb9d94d7538ec130a6f",
+    "notes": "Seven identifiable title banners; an additional almost fully occluded card has no readable title and is not an expected detection."
   },
   {
-    "image": "IMG_5716.jpeg",
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_21_48 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Tornádo",
+      "Těžká jízda",
+      "Elfský luk",
+      "Nekromant",
+      "Elementál vody",
+      "Bojová vzducholoď",
+      "Kouř"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "8562f3b075a27bd25b9b986dcfbaf4a05bb1b21cc65269478d5714a261257e62"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_21_55 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Tornádo",
+      "Těžká jízda",
+      "Elfský luk",
+      "Nekromant",
+      "Elementál vody",
+      "Bojová vzducholoď",
+      "Kouř"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "bb1c0b52bd0b1f94cf930afed09e62dd2947ac328b05c189c1becad1014a2971"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_03 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Nejvyšší mág",
+      "Drak",
+      "Elementál ohně",
+      "Zvonice",
+      "Kethský štít",
+      "Jednorožec",
+      "Bouře"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "7d072a8436b7c06a9136004caa6cd71a5c67dd5bc1619e4d994674eaa730f9e0"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_10 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Válečná loď",
+      "Šašek",
+      "Magická hůl",
+      "Kethský meč",
+      "Les",
+      "Pán šelem",
+      "Požár"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "bb8fb3f44e94f5f844480fd098a4c61e80124105584f0cce1788cd725ed3a8b2"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_19 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Ostrov",
+      "Hora",
+      "Svíčka",
+      "Elementál země",
+      "Blesk",
+      "Velitel",
+      "Hydra"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "30a6c42f87629d34b9d76c6de5af955eb7385a07a169b3504ae867261e34ac05"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_27 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Král",
+      "Stoletá voda",
+      "Fontána života",
+      "Sběratel",
+      "Rytířky",
+      "Elfí lučištníci",
+      "Bažina"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "9234edc0245162a73a78ad48f6d81bcc46999d829ba07dfb02f418d592a14c28"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_35 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Hraničáři",
+      "Princezna",
+      "Kouzelnice",
+      "Přelud",
+      "Jeskyně",
+      "Císařovna",
+      "Válečný oř"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "c2e9e41a0eb4618f15a58a2c739e564f56ad72d28af7a0dda05449f702f0afa5"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_42 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Elementál vzduchu",
+      "Dvojník",
+      "Strom světa",
+      "Bazilišek",
+      "Sněhová vánice",
+      "Trpasličí pěchota",
+      "Ochranná runa"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "4ffa7035f12541223a014d73a3fb4f9274257780098a9a074c7ea3956eb0c58c"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_49 PM.jpg",
+    "group": "photo",
     "expected": [
       "Sběratel",
       "Rytířky",
@@ -117,6 +146,110 @@
       "Bazilišek",
       "Sněhová vánice",
       "Trpasličí pěchota"
-    ]
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "42cbb4fc0d90dfa229139b142892a35a7552d9c1e8942717b02b5603cec3ad3a"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_37 PM-1.png",
+    "group": "original",
+    "expected": [
+      "Elfí lučištníci",
+      "Bazilišek",
+      "Sněhová vánice",
+      "Elementál vody",
+      "Nejvyšší mág",
+      "Krystal řádu",
+      "Magická hůl",
+      "Velitel",
+      "Císařovna"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "18e1ca77e738612611d0fdb35f086e2631135b84ee2dede3a20e70b5bb99b4cd"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_38 PM-2.png",
+    "group": "original",
+    "expected": [
+      "Rytířky",
+      "Strom světa",
+      "Trpasličí pěchota",
+      "Kouř",
+      "Elementál ohně",
+      "Šašek",
+      "Svíčka",
+      "Hydra",
+      "Jeskyně"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "39b146ddee98730c3e6c38640eb811f57f5c69a19a676a2d0dd63f18802b0287"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_39 PM-3.png",
+    "group": "original",
+    "expected": [
+      "Fontána života",
+      "Elementál vzduchu",
+      "Kovárna",
+      "Tornádo",
+      "Drak",
+      "Jednorožec",
+      "Pán šelem",
+      "Ostrov",
+      "Přelud"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "d9def1d30e897126f600112f87bc824996e1597f75847843dc269812f4cf06f2"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_40 PM-4.png",
+    "group": "original",
+    "expected": [
+      "Sběratel",
+      "Dvojník",
+      "Ochranná runa",
+      "Nekromant",
+      "Zvonice",
+      "Válečná loď",
+      "Elementál země",
+      "Hora",
+      "Kouzelnice"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "fe459982288fe6f6b0fec955c5514ac34c8166459690ac1108fccc525aca977c"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_40 PM-5.png",
+    "group": "original",
+    "expected": [
+      "Stoletá voda",
+      "Bažina",
+      "Královna",
+      "Měňavec",
+      "Bojová vzducholoď",
+      "Kethský štít",
+      "Les",
+      "Blesk",
+      "Princezna"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "f620f0ad80b980880a5ae24622c7b12fc0fa7f26648843acf1339a1d85892119"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_41 PM-6.png",
+    "group": "original",
+    "expected": [
+      "Válečný oř",
+      "Král",
+      "Kniha proměn",
+      "Elfský luk",
+      "Těžká jízda",
+      "Bouře",
+      "Kethský meč",
+      "Požár",
+      "Hraničáři"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "12c9fd49ec30c82c48fa6c082d1b0cded3cf1a543c8ac5be27856336926f1a98"
   }
 ]

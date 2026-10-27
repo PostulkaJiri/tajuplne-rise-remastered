@@ -1,25 +1,29 @@
-# OCR regression fixtures
+# Private OCR regression fixtures
 
-Copy the ten real test photos into this directory using these exact names:
+`ground_truth.json` contains independent manual visual transcriptions of title
+banners in 16 supplied images: ten photographs (70 readable titles) and six
+original sheets (54 titles, all FR01–FR54). Labels were read from the photographs,
+not inferred from OCR results or old IMG filenames. Each label includes the
+source image SHA-256 to detect accidental substitutions.
 
-- IMG_5707.jpeg
-- IMG_5708.jpeg
-- IMG_5709.jpeg
-- IMG_5710.jpeg
-- IMG_5711.jpeg
-- IMG_5712.jpeg
-- IMG_5713.jpeg
-- IMG_5714.jpeg
-- IMG_5715.jpeg
-- IMG_5716.jpeg
+Private image bytes are absent from Git and Docker build context. Put them in:
 
-Ground truth is stored in ../ground_truth.json.
+```text
+scans/foto/ChatGPT Image Oct 27, 2026, <time> PM.jpg
+scans/originaly/ChatGPT Image Oct 26, 2026, <time> PM-<number>.png
+```
 
-Images are intentionally not committed by default so the repository does not
-silently publish personal camera photos. Run:
+On this server the supplied files also remain in `testovaci-data/`; that entire
+folder is ignored by Git and Docker. The source files are copied, never renamed
+or modified. The photograph at 19:21:40 has an additional almost fully occluded
+card with no readable title; that hidden card is excluded from expected results.
 
-    python backend/scripts/evaluate_fixtures.py --api https://YOUR_HOST/api/v1/scan
+Run sequential evaluation against the local server:
 
-Acceptance target for normal seven-card hands:
-- recall >= 6/7 per representative image,
-- zero automatically accepted false positives.
+```bash
+python3 backend/scripts/evaluate_fixtures.py --group photo --output backend/fixture-results.json
+python3 backend/scripts/evaluate_fixtures.py --group original
+```
+
+Never commit photographs, include them in images, or send them to external OCR
+services. Use only the self-hosted API and the fixture directory for regression.

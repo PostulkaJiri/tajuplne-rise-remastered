@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import mimetypes
@@ -38,6 +39,7 @@ def evaluate_case(case: dict, payload: dict, round_trip_ms: float) -> dict:
     detected = {item["name"] for item in payload.get("cards", []) if item.get("accepted") is True}
     return {
         "image": case["image"],
+        "group": case.get("group", "photo"),
         "expected": sorted(expected),
         "detected": sorted(detected),
         "correct": sorted(expected & detected),
@@ -52,10 +54,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Sequential, local OCR fixture evaluation (no image uploads outside the supplied API).")
     parser.add_argument("--api", default="http://192.168.0.249:18080/api/v1/scan")
     parser.add_argument("--fixtures", default=str(Path(__file__).resolve().parents[1] / "tests" / "fixtures"))
+    parser.add_argument("--group", choices=("photo", "original"), help="Evaluate only photos or original card sheets.")
     parser.add_argument("--output", type=Path, help="Write names, metrics and missing filenames as JSON; never image bytes.")
     args = parser.parse_args(argv)
     fixture_dir = Path(args.fixtures)
     truth = json.loads((fixture_dir / "ground_truth.json").read_text(encoding="utf-8"))
+    if args.group:
+        truth = [case for case in truth if case.get("group") == args.group]
     results, missing_files = [], []
     for case in truth:
         image_path = fixture_dir / "scans" / case["image"]
@@ -64,9 +69,12 @@ def main(argv: list[str] | None = None) -> int:
             continue
         started = time.perf_counter()
         try:
+            data = image_path.read_bytes()
+            if case.get("sha256") and hashlib.sha256(data).hexdigest() != case["sha256"]:
+                raise ValueError("Fixture differs from the manually labelled image (SHA-256 mismatch).")
             request = urllib.request.Request(
                 args.api + ("&" if "?" in args.api else "?") + "debug=true",
-                data=image_path.read_bytes(),
+                data=data,
                 headers={"Content-Type": mimetypes.guess_type(image_path.name)[0] or "image/jpeg"},
                 method="POST",
             )
@@ -74,11 +82,13 @@ def main(argv: list[str] | None = None) -> int:
                 payload = json.load(response)
             result = evaluate_case(case, payload, (time.perf_counter() - started) * 1000)
         except (urllib.error.URLError, TimeoutError, ValueError, KeyError) as error:
-            result = {"image": case["image"], "expected": case["expected"], "error": str(error)}
+            result = {"image": case["image"], "group": case.get("group", "photo"), "expected": case["expected"], "error": str(error)}
         results.append(result)
         print(json.dumps(result, ensure_ascii=False))
     summary = summarize(results)
-    report = {"summary": summary, "results": results, "missingImages": missing_files}
+    groups = {group: summarize([row for row in results if row.get("group") == group])
+              for group in sorted({row.get("group", "photo") for row in results})}
+    report = {"summary": summary, "groups": groups, "results": results, "missingImages": missing_files}
     if missing_files:
         print("test fixtures missing:", ", ".join(missing_files))
     print(json.dumps(summary, ensure_ascii=False, indent=2))

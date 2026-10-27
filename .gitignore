@@ -10,3 +10,7 @@ backend/tests/fixtures/scans/*
 backend/fixture-results.json
 backend/cache-*.json
 backend/smoke-after-restart.json
+
+testovaci-data/
+
+backend/local-ocr/
