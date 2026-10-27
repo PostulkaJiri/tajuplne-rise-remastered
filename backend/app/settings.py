@@ -61,6 +61,11 @@ class Settings:
     min_title_style: float = _env_float("MIN_TITLE_STYLE", 0.30)
 
     max_image_bytes: int = _env_int("MAX_IMAGE_BYTES", 8_000_000)
+    save_captured_images: bool = _env_bool("SAVE_CAPTURED_IMAGES", False)
+    capture_dir: str = os.getenv("CAPTURE_DIR", "/app/captures")
+    capture_max_bytes: int = _env_int("CAPTURE_STORAGE_MAX_BYTES", 5_000_000_000)
+    max_original_bytes: int = _env_int("MAX_ORIGINAL_PHOTO_BYTES", 25_000_000)
+    card_art_dir: str = os.getenv("CARD_ART_DIR", "/app/card-originals")
     debug_save_failed_scans: bool = _env_bool("DEBUG_SAVE_FAILED_SCANS", False)
     debug_dir: str = os.getenv("DEBUG_SCAN_DIR", "/tmp/tajuplne-rise-scans")
     cors_origins: tuple[str, ...] = tuple(

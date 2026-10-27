@@ -5,3 +5,4 @@ paddlex==3.6.1
 opencv-python-headless==4.10.0.84
 rapidfuzz==3.14.1
 numpy==1.26.4
+Pillow==12.1.0

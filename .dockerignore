@@ -13,3 +13,6 @@ backend/fixture-results.json
 testovaci-data/
 
 backend/local-ocr/
+
+# Private card originals and captured photographs
+data/

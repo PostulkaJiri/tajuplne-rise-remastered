@@ -14,3 +14,6 @@ backend/smoke-after-restart.json
 testovaci-data/
 
 backend/local-ocr/
+
+# Private card originals and captured photographs
+data/

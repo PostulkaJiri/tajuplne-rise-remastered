@@ -81,3 +81,47 @@ def test_valid_image_uses_scanner(client):
     response = client.post("/api/v1/scan", content=data.tobytes(), headers={"Content-Type": "image/jpeg"})
     assert response.status_code == 200
     assert response.json()["cards"] == []
+
+
+def test_capture_original_and_ocr_input_are_saved_privately(client, monkeypatch, tmp_path):
+    from app.captures import CaptureStore
+    main.app.state.captures = CaptureStore(tmp_path/'captures',True,10_000_000,minimum_free_bytes=0)
+    ok, image = cv2.imencode('.jpg',np.full((40,40,3),220,dtype=np.uint8))
+    assert ok
+    response = client.post('/api/v1/captures',content=image.tobytes(),headers={'Content-Type':'image/jpeg'})
+    assert response.status_code == 200 and response.json()['stored']
+    capture_id = response.json()['id']
+    assert (tmp_path/'captures'/(capture_id+'.jpg')).read_bytes()==image.tobytes()
+    scanned = client.post('/api/v1/scan?source=photo&capture_id='+capture_id,content=image.tobytes(),headers={'Content-Type':'image/jpeg'})
+    assert scanned.status_code==200 and scanned.json()['capture']['stored']
+    assert client.get('/captures/'+capture_id+'.jpg').status_code==404
+    assert client.get('/card-images/FR99.webp').status_code==404
+
+
+def test_capture_failure_is_reported_without_breaking_ocr(client, tmp_path):
+    from app.captures import CaptureStore
+    main.app.state.captures = CaptureStore(tmp_path/'captures',True,1,minimum_free_bytes=0)
+    ok,image = cv2.imencode('.jpg',np.full((32,32,3),200,dtype=np.uint8))
+    response = client.post('/api/v1/scan',content=image.tobytes(),headers={'Content-Type':'image/jpeg'})
+    assert response.status_code==200
+    assert response.json()['capture']['stored'] is False
+    assert response.json()['capture']['error']=='quota'
+    assert client.post('/api/v1/captures',content=image.tobytes(),headers={'Content-Type':'image/jpeg'}).status_code==507
+
+
+def test_capture_formats_limits_and_links(client, monkeypatch):
+    assert client.post('/api/v1/captures',content=b'bad',headers={'Content-Type':'text/plain'}).status_code==415
+    assert client.post('/api/v1/captures',content=b'bad',headers={'Content-Type':'image/jpeg'}).status_code==400
+    monkeypatch.setattr(main,'settings',replace(main.settings,max_original_bytes=16))
+    assert client.post('/api/v1/captures',content=b'x'*17,headers={'Content-Type':'image/jpeg'}).status_code==413
+    assert client.post('/api/v1/scan?capture_id=../../etc/passwd',content=b'x',headers={'Content-Type':'image/jpeg'}).status_code==422
+
+
+def test_failed_ocr_input_is_still_kept(client, monkeypatch, tmp_path):
+    from app.captures import CaptureStore
+    main.app.state.captures = CaptureStore(tmp_path/'captures',True,10_000_000,minimum_free_bytes=0)
+    def fail(image,debug):raise RuntimeError('predictor failed')
+    monkeypatch.setattr(main.app.state.ocr,'scan',fail)
+    ok,image=cv2.imencode('.jpg',np.full((32,32,3),220,dtype=np.uint8))
+    with pytest.raises(RuntimeError):client.post('/api/v1/scan',content=image.tobytes(),headers={'Content-Type':'image/jpeg'})
+    assert len(list((tmp_path/'captures').glob('*.jpg')))==1

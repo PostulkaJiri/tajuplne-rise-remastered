@@ -1,0 +1,374 @@
+{
+  "columns": 3,
+  "rows": 3,
+  "sheets": {
+    "sheet-1.png": {
+      "source": "originaly/ChatGPT Image Oct 26, 2026, 07_56_37 PM-1.png",
+      "sha256": "18e1ca77e738612611d0fdb35f086e2631135b84ee2dede3a20e70b5bb99b4cd",
+      "xCuts": [
+        0,
+        353,
+        702,
+        1055
+      ],
+      "yCuts": [
+        0,
+        489,
+        983,
+        1491
+      ]
+    },
+    "sheet-2.png": {
+      "source": "originaly/ChatGPT Image Oct 26, 2026, 07_56_38 PM-2.png",
+      "sha256": "39b146ddee98730c3e6c38640eb811f57f5c69a19a676a2d0dd63f18802b0287",
+      "xCuts": [
+        0,
+        351,
+        705,
+        1055
+      ],
+      "yCuts": [
+        0,
+        478,
+        960,
+        1491
+      ]
+    },
+    "sheet-3.png": {
+      "source": "originaly/ChatGPT Image Oct 26, 2026, 07_56_39 PM-3.png",
+      "sha256": "d9def1d30e897126f600112f87bc824996e1597f75847843dc269812f4cf06f2",
+      "xCuts": [
+        0,
+        366,
+        726,
+        1055
+      ],
+      "yCuts": [
+        0,
+        495,
+        988,
+        1491
+      ]
+    },
+    "sheet-4.png": {
+      "source": "originaly/ChatGPT Image Oct 26, 2026, 07_56_40 PM-4.png",
+      "sha256": "fe459982288fe6f6b0fec955c5514ac34c8166459690ac1108fccc525aca977c",
+      "xCuts": [
+        0,
+        355,
+        701,
+        1055
+      ],
+      "yCuts": [
+        0,
+        497,
+        991,
+        1491
+      ]
+    },
+    "sheet-5.png": {
+      "source": "originaly/ChatGPT Image Oct 26, 2026, 07_56_40 PM-5.png",
+      "sha256": "f620f0ad80b980880a5ae24622c7b12fc0fa7f26648843acf1339a1d85892119",
+      "xCuts": [
+        0,
+        352,
+        703,
+        1055
+      ],
+      "yCuts": [
+        0,
+        482,
+        976,
+        1491
+      ]
+    },
+    "sheet-6.png": {
+      "source": "originaly/ChatGPT Image Oct 26, 2026, 07_56_41 PM-6.png",
+      "sha256": "12c9fd49ec30c82c48fa6c082d1b0cded3cf1a543c8ac5be27856336926f1a98",
+      "xCuts": [
+        0,
+        345,
+        681,
+        1055
+      ],
+      "yCuts": [
+        0,
+        497,
+        986,
+        1491
+      ]
+    }
+  },
+  "cards": {
+    "FR22": {
+      "sheet": "sheet-1.png",
+      "column": 0,
+      "row": 0
+    },
+    "FR37": {
+      "sheet": "sheet-1.png",
+      "column": 1,
+      "row": 0
+    },
+    "FR12": {
+      "sheet": "sheet-1.png",
+      "column": 2,
+      "row": 0
+    },
+    "FR10": {
+      "sheet": "sheet-1.png",
+      "column": 0,
+      "row": 1
+    },
+    "FR29": {
+      "sheet": "sheet-1.png",
+      "column": 1,
+      "row": 1
+    },
+    "FR47": {
+      "sheet": "sheet-1.png",
+      "column": 2,
+      "row": 1
+    },
+    "FR42": {
+      "sheet": "sheet-1.png",
+      "column": 0,
+      "row": 2
+    },
+    "FR34": {
+      "sheet": "sheet-1.png",
+      "column": 1,
+      "row": 2
+    },
+    "FR35": {
+      "sheet": "sheet-1.png",
+      "column": 2,
+      "row": 2
+    },
+    "FR21": {
+      "sheet": "sheet-2.png",
+      "column": 0,
+      "row": 0
+    },
+    "FR48": {
+      "sheet": "sheet-2.png",
+      "column": 1,
+      "row": 0
+    },
+    "FR24": {
+      "sheet": "sheet-2.png",
+      "column": 2,
+      "row": 0
+    },
+    "FR13": {
+      "sheet": "sheet-2.png",
+      "column": 0,
+      "row": 1
+    },
+    "FR20": {
+      "sheet": "sheet-2.png",
+      "column": 1,
+      "row": 1
+    },
+    "FR54": {
+      "sheet": "sheet-2.png",
+      "column": 2,
+      "row": 1
+    },
+    "FR17": {
+      "sheet": "sheet-2.png",
+      "column": 0,
+      "row": 2
+    },
+    "FR40": {
+      "sheet": "sheet-2.png",
+      "column": 1,
+      "row": 2
+    },
+    "FR02": {
+      "sheet": "sheet-2.png",
+      "column": 2,
+      "row": 2
+    },
+    "FR06": {
+      "sheet": "sheet-3.png",
+      "column": 0,
+      "row": 0
+    },
+    "FR15": {
+      "sheet": "sheet-3.png",
+      "column": 1,
+      "row": 0
+    },
+    "FR18": {
+      "sheet": "sheet-3.png",
+      "column": 2,
+      "row": 0
+    },
+    "FR14": {
+      "sheet": "sheet-3.png",
+      "column": 0,
+      "row": 1
+    },
+    "FR39": {
+      "sheet": "sheet-3.png",
+      "column": 1,
+      "row": 1
+    },
+    "FR36": {
+      "sheet": "sheet-3.png",
+      "column": 2,
+      "row": 1
+    },
+    "FR27": {
+      "sheet": "sheet-3.png",
+      "column": 0,
+      "row": 2
+    },
+    "FR09": {
+      "sheet": "sheet-3.png",
+      "column": 1,
+      "row": 2
+    },
+    "FR52": {
+      "sheet": "sheet-3.png",
+      "column": 2,
+      "row": 2
+    },
+    "FR26": {
+      "sheet": "sheet-4.png",
+      "column": 0,
+      "row": 0
+    },
+    "FR53": {
+      "sheet": "sheet-4.png",
+      "column": 1,
+      "row": 0
+    },
+    "FR50": {
+      "sheet": "sheet-4.png",
+      "column": 2,
+      "row": 0
+    },
+    "FR28": {
+      "sheet": "sheet-4.png",
+      "column": 0,
+      "row": 1
+    },
+    "FR03": {
+      "sheet": "sheet-4.png",
+      "column": 1,
+      "row": 1
+    },
+    "FR41": {
+      "sheet": "sheet-4.png",
+      "column": 2,
+      "row": 1
+    },
+    "FR05": {
+      "sheet": "sheet-4.png",
+      "column": 0,
+      "row": 2
+    },
+    "FR01": {
+      "sheet": "sheet-4.png",
+      "column": 1,
+      "row": 2
+    },
+    "FR30": {
+      "sheet": "sheet-4.png",
+      "column": 2,
+      "row": 2
+    },
+    "FR08": {
+      "sheet": "sheet-5.png",
+      "column": 0,
+      "row": 0
+    },
+    "FR07": {
+      "sheet": "sheet-5.png",
+      "column": 1,
+      "row": 0
+    },
+    "FR32": {
+      "sheet": "sheet-5.png",
+      "column": 2,
+      "row": 0
+    },
+    "FR51": {
+      "sheet": "sheet-5.png",
+      "column": 0,
+      "row": 1
+    },
+    "FR45": {
+      "sheet": "sheet-5.png",
+      "column": 1,
+      "row": 1
+    },
+    "FR46": {
+      "sheet": "sheet-5.png",
+      "column": 2,
+      "row": 1
+    },
+    "FR04": {
+      "sheet": "sheet-5.png",
+      "column": 0,
+      "row": 2
+    },
+    "FR19": {
+      "sheet": "sheet-5.png",
+      "column": 1,
+      "row": 2
+    },
+    "FR33": {
+      "sheet": "sheet-5.png",
+      "column": 2,
+      "row": 2
+    },
+    "FR38": {
+      "sheet": "sheet-6.png",
+      "column": 0,
+      "row": 0
+    },
+    "FR31": {
+      "sheet": "sheet-6.png",
+      "column": 1,
+      "row": 0
+    },
+    "FR49": {
+      "sheet": "sheet-6.png",
+      "column": 2,
+      "row": 0
+    },
+    "FR44": {
+      "sheet": "sheet-6.png",
+      "column": 0,
+      "row": 1
+    },
+    "FR23": {
+      "sheet": "sheet-6.png",
+      "column": 1,
+      "row": 1
+    },
+    "FR11": {
+      "sheet": "sheet-6.png",
+      "column": 2,
+      "row": 1
+    },
+    "FR43": {
+      "sheet": "sheet-6.png",
+      "column": 0,
+      "row": 2
+    },
+    "FR16": {
+      "sheet": "sheet-6.png",
+      "column": 1,
+      "row": 2
+    },
+    "FR25": {
+      "sheet": "sheet-6.png",
+      "column": 2,
+      "row": 2
+    }
+  }
+}
