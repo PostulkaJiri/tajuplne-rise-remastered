@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 from app.matcher import CardMatcher
-from app.ocr_service import _join_title_fragments, _map_polygon, _normalized_box, _rotate_bound
+from app.ocr_service import _join_title_fragments, _map_polygon, _normalized_box, _rotate_bound, _title_style_score
 
 CARDS = Path(__file__).resolve().parents[1] / 'app' / 'cards.json'
 
@@ -80,3 +80,15 @@ def test_prefilter_preserves_crop_order_and_keeps_candidate_title_regions():
     assert len(filtered)==2
     assert filtered[0] is crops[0]
     assert filtered[1].size==0
+
+
+def test_title_filter_is_invariant_to_quarter_turns_and_rejects_cream_rules():
+    image = np.full((360,480,3),45,dtype=np.uint8)
+    image[160:240,80:400] = 235
+    title = np.array([[100,80],[360,80],[360,100],[100,100]],dtype=np.float32)
+    rules = np.array([[100,185],[360,185],[360,205],[100,205]],dtype=np.float32)
+    for angle in (0,90,180,270):
+        rotated,inverse = _rotate_bound(image,angle)
+        forward = cv2.invertAffineTransform(inverse)
+        assert _title_style_score(rotated,_map_polygon(title,forward)) > .8
+        assert _title_style_score(rotated,_map_polygon(rules,forward)) < .1

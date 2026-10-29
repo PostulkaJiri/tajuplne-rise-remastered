@@ -102,8 +102,12 @@ def _title_style_score(image: np.ndarray, poly: np.ndarray) -> float:
     box_h = max(2.0, y1 - y0)
     box_w = max(2.0, x1 - x0)
 
-    pad_x = box_w * 0.12
-    pad_y = box_h * 0.70
+    # Keep padding across the text line consistent when the camera/card is
+    # sideways. Padding 70% of a vertical line's length samples distant card
+    # artwork and can make cream rules text look like a dark title banner.
+    vertical = box_h > box_w
+    pad_x = box_w * (0.70 if vertical else 0.12)
+    pad_y = box_h * (0.12 if vertical else 0.70)
     ix0 = max(0, int(x0 - pad_x))
     iy0 = max(0, int(y0 - pad_y))
     ix1 = min(w, int(x1 + pad_x))

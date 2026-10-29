@@ -10,6 +10,7 @@ import statistics
 import time
 import urllib.error
 import urllib.request
+import urllib.parse
 from pathlib import Path
 
 
@@ -54,9 +55,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Sequential, local OCR fixture evaluation (no image uploads outside the supplied API).")
     parser.add_argument("--api", default="http://192.168.0.249:18080/api/v1/scan")
     parser.add_argument("--fixtures", default=str(Path(__file__).resolve().parents[1] / "tests" / "fixtures"))
-    parser.add_argument("--group", choices=("photo", "original"), help="Evaluate only photos or original card sheets.")
+    parser.add_argument("--group", choices=("photo", "original", "capture"), help="Evaluate supplied photos, original sheets or manually labelled captured photos.")
     parser.add_argument("--output", type=Path, help="Write names, metrics and missing filenames as JSON; never image bytes.")
     args = parser.parse_args(argv)
+    api = urllib.parse.urlsplit(args.api)
+    query = dict(urllib.parse.parse_qsl(api.query))
+    query.update(debug="true", source="test")
+    scan_url = urllib.parse.urlunsplit(api._replace(query=urllib.parse.urlencode(query)))
     fixture_dir = Path(args.fixtures)
     truth = json.loads((fixture_dir / "ground_truth.json").read_text(encoding="utf-8"))
     if args.group:
@@ -73,7 +78,7 @@ def main(argv: list[str] | None = None) -> int:
             if case.get("sha256") and hashlib.sha256(data).hexdigest() != case["sha256"]:
                 raise ValueError("Fixture differs from the manually labelled image (SHA-256 mismatch).")
             request = urllib.request.Request(
-                args.api + ("&" if "?" in args.api else "?") + "debug=true",
+                scan_url,
                 data=data,
                 headers={"Content-Type": mimetypes.guess_type(image_path.name)[0] or "image/jpeg"},
                 method="POST",

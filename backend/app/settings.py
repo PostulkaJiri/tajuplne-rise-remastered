@@ -26,7 +26,7 @@ def _env_int(name: str, default: int) -> int:
 
 
 def _rotations() -> tuple[float, ...]:
-    raw = os.getenv("SCAN_ROTATIONS", "0,-15")
+    raw = os.getenv("SCAN_ROTATIONS", "0,-90")
     values: list[float] = []
     for item in raw.split(","):
         item = item.strip()

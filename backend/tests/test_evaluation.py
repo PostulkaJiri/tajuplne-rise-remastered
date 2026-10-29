@@ -58,7 +58,10 @@ def test_group_selection_does_not_mix_photos_and_originals(tmp_path):
     (tmp_path / 'ground_truth.json').write_text(json.dumps([
         {'image':'photo.jpg','group':'photo','expected':['Král']},
         {'image':'original.png','group':'original','expected':['Královna']},
+        {'image':'captures/captured.jpg','group':'capture','expected':['Les']},
     ]))
     output=tmp_path/'result.json'
     assert evaluation.main(['--fixtures',str(tmp_path),'--group','photo','--output',str(output)])==2
     assert json.loads(output.read_text())['missingImages']==['photo.jpg']
+    assert evaluation.main(['--fixtures',str(tmp_path),'--group','capture','--output',str(output)])==2
+    assert json.loads(output.read_text())['missingImages']==['captures/captured.jpg']

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import unicodedata
 from dataclasses import dataclass
@@ -78,8 +79,13 @@ class CardMatcher:
         second_score = ranked[1][0] if len(ranked) > 1 else 0.0
         margin = best_score - second_score
 
-        length_delta = abs(len(cleaned) - len(best.normalized))
-        length_ok = length_delta <= max(4, round(len(best.normalized) * 0.40))
+        # A high fuzzy ratio alone can turn clipped "Rytir" into Rytířky or
+        # a three-letter hallucination "ral" into Král. Require most of the
+        # actual title, without length loss for very short names.
+        length_ok = (
+            len(cleaned) >= max(min(4, len(best.normalized)), math.ceil(len(best.normalized) * 0.80))
+            and len(cleaned) <= math.ceil(len(best.normalized) * 1.40)
+        )
         accepted = (
             margin >= self.min_margin
             and length_ok

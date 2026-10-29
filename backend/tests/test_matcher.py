@@ -56,6 +56,16 @@ def test_shared_title_fragments_remain_candidates():
         assert match is None or not match.accepted, fragment
 
 
+def test_clipped_knights_and_short_king_hallucination_are_not_accepted():
+    m = matcher()
+    for fragment in ('Rytir', 'ral'):
+        match = m.match(fragment)
+        assert match is None or not match.accepted
+    assert m.match('Rytířky').accepted
+    assert m.match('Král').accepted
+    assert m.match('Les').accepted
+
+
 def test_very_high_but_ambiguous_scores_do_not_bypass_margin(tmp_path):
     cards = tmp_path / "cards.json"
     cards.write_text('[{"id":"FR01","name":"abcdefghijx"},{"id":"FR02","name":"abcdefghijy"}]')

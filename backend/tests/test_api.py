@@ -1,4 +1,5 @@
 from dataclasses import replace
+import asyncio
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
@@ -119,6 +120,40 @@ def test_health_responds_during_inference_and_concurrent_scan_is_rejected(client
         finally:
             release.set()
         assert first.result(timeout=3).status_code == 200
+
+
+def test_cancelled_request_does_not_release_predictor_until_inference_finishes(client, monkeypatch):
+    from starlette.requests import Request
+    entered, release = threading.Event(), threading.Event()
+    original_scan = main.app.state.ocr.scan
+    def slow_scan(image, debug):
+        entered.set()
+        assert release.wait(timeout=3)
+        return original_scan(image,debug)
+    monkeypatch.setattr(main.app.state.ocr,'scan',slow_scan)
+    _, image = cv2.imencode('.jpg',np.full((32,32,3),255,dtype=np.uint8))
+    async def receive():
+        return {'type':'http.request','body':image.tobytes(),'more_body':False}
+    async def check():
+        request = Request({'type':'http','method':'POST','path':'/api/v1/scan',
+            'headers':[(b'content-type',b'image/jpeg')]},receive)
+        task = asyncio.create_task(main.scan(request,False,'test',None))
+        try:
+            for _ in range(100):
+                if entered.is_set():break
+                await asyncio.sleep(.005)
+            assert entered.is_set()
+            task.cancel()
+            await asyncio.sleep(.01)
+            assert main.app.state.scan_lock.locked()
+            with pytest.raises(main.HTTPException) as error:
+                await main.scan(request,False,'test',None)
+            assert error.value.status_code == 429
+        finally:
+            release.set()
+            with pytest.raises(asyncio.CancelledError):await task
+        assert not main.app.state.scan_lock.locked()
+    client.portal.call(check)
 
 
 def test_capture_original_and_ocr_input_are_saved_privately(client, monkeypatch, tmp_path):
