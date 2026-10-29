@@ -4,163 +4,139 @@ var playerCount=4;
 
 (function(){
 var camera=document.getElementById("camera");
+var cameraFrame=document.getElementById("cameraFrame");
 var overlay=document.getElementById("detectionOverlay");
-var cameraPlaceholder=document.getElementById("cameraPlaceholder");
-var startButton=document.getElementById("startCamera");
-var stopButton=document.getElementById("stopCamera");
+var placeholder=document.getElementById("cameraPlaceholder");
+var cameraTitle=document.getElementById("cameraTitle");
+var cameraHint=document.getElementById("cameraHint");
+var photoPreview=document.getElementById("photoPreview");
 var upload=document.getElementById("imageUpload");
 var status=document.getElementById("ocrStatus");
-var detections=document.getElementById("detections");
 var handCards=document.getElementById("handCards");
-var scoreNode=document.getElementById("score");
-var handCount=document.getElementById("handCount");
-var handLimit=document.getElementById("handLimit");
-var manualSearch=document.getElementById("manualSearch");
-var manualResults=document.getElementById("manualResults");
-var manualStatus=document.getElementById("manualStatus");
+var emptyHand=document.getElementById("emptyHand");
 var actionDialog=document.getElementById("actionDialog");
 var actionTitle=document.getElementById("actionTitle");
 var actionBody=document.getElementById("actionBody");
 var saveAction=document.getElementById("saveAction");
-
-var manualMatches=[];
 var currentActionCardId=null;
-var lastDetections=[];
-var liveSession=null;
-var liveRunning=false;
-var suppressedUntil={};
-var lastLiveSnapshot={detections:[],candidates:[]};
-
+var liveSession=null,starting=false,photoBusy=false,generation=0;
+var allowLive=window.isSecureContext&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia;
+var suppressedUntil={},clearedCards={},photoUrl=null,handRevision=0,ignoreFramesBefore=0;
+var lastSnapshot={detections:[],candidates:[]};
 var suitNames={land:"Země",flood:"Potopa",weather:"Počasí",flame:"Oheň",army:"Armáda",wizard:"Čaroděj",leader:"Vůdce",beast:"Tvor",weapon:"Zbraň",artifact:"Artefakt",wild:"Divoká"};
 
-function escapeHtml(value){
-  return String(value==null?"":value)
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;").replace(/'/g,"&#039;")
-}
+function escapeHtml(value){return String(value==null?"":value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
 function registryCard(id){return window.CARD_REGISTRY[id]}
-function isBaseId(id){return /^FR(?:0[1-9]|[1-4][0-9]|5[0-4])$/.test(id)}
-function baseIds(){return Object.keys(window.CARD_REGISTRY).filter(isBaseId).sort()}
-function setStatus(text,type,progress){
-  status.className="status"+(type?" "+type:"");
-  var html=escapeHtml(text||"");
-  if(typeof progress==="number"){
-    var pct=Math.max(0,Math.min(100,Math.round(progress*100)));
-    html+='<div class="progressTrack"><span style="width:'+pct+'%"></span></div>'
-  }
-  status.innerHTML=html
-}
-
-function addCard(id,source){
-  if(!isBaseId(id))return false;
-  if(hand.getCardById(id))return false;
-  var card=deck.getCardById(id);
-  if(!card)return false;
-  if(!hand.addCard(card)){
-    if(source!=="live")manualStatus.textContent="Tuto kartu teď nelze přidat – zkontroluj limit ruky a pravidlo Nekromanta.";
-    return false
-  }
-  render();
-  return true
-}
-function removeCard(id){
-  hand.deleteCardById(id);
-  if(liveRunning)suppressedUntil[id]=Date.now()+8000;
-  render()
-}
-function isSuppressed(id){
-  return suppressedUntil[id]&&suppressedUntil[id]>Date.now()
-}
-function autoAddConfirmed(items){
-  var added=[];
-  items.forEach(function(item){
-    if(!item.confirmed||!item.id||hand.getCardById(item.id)||isSuppressed(item.id))return;
-    if(addCard(item.id,"live"))added.push(item.name)
-  });
-  return added
-}
-
+function baseIds(){return Object.keys(window.CARD_REGISTRY).filter(function(id){return /^FR(?:0[1-9]|[1-4][0-9]|5[0-4])$/.test(id)}).sort()}
+function setStatus(text,type){status.className="cameraStatus"+(type?" "+type:"");status.textContent=text||""}
 function actionDescription(card){
-  if(!card)return "";
-  if(card.card&&card.card.action&&!card.actionData)return "Pro přesné skóre je potřeba nastavit efekt této karty.";
+  if(card.card&&card.card.action&&!card.actionData)return "Vyžaduje nastavení efektu.";
   if(!card.actionData||!card.actionData.length)return "";
-  var targetId=card.actionData[0],target=registryCard(targetId),targetName=target?target.name:targetId;
-  if(card.id==="FR49"&&card.actionData[1])return "Mění "+targetName+" na barvu "+(suitNames[String(card.actionData[1]).toLowerCase()]||card.actionData[1])+".";
-  if(card.id==="FR09")return "Odstraňuje postih kartě "+targetName+".";
-  if(card.id==="FR53")return "Kopíruje "+targetName+".";
-  if(card.id==="FR51"||card.id==="FR52")return "Napodobuje "+targetName+".";
-  return targetName
+  var target=registryCard(card.actionData[0]);
+  var name=target?target.name:card.actionData[0];
+  if(card.id==="FR49")return "Mění "+name+" na barvu "+(suitNames[card.actionData[1]]||card.actionData[1])+".";
+  if(card.id==="FR09")return "Odstraňuje postih kartě "+name+".";
+  return "Napodobuje "+name+"."
 }
 function ruleHtml(id){
-  var item=registryCard(id);
-  if(!item)return "";
-  var parts=[];
-  if(item.bonus)parts.push("<b>BONUS:</b> "+item.bonus);
-  if(item.penalty)parts.push("<b>POSTIH:</b> "+item.penalty);
-  return parts.join("<br>")
+  var card=registryCard(id),parts=[];
+  if(card&&card.bonus)parts.push("<b>BONUS:</b> "+card.bonus);
+  if(card&&card.penalty)parts.push("<b>POSTIH:</b> "+card.penalty);
+  return parts.join("<br><br>")
 }
-
+function layoutCards(){
+  var count=hand.size(),wide=handCards.clientWidth>handCards.clientHeight*1.5;
+  var columns=Math.max(1,count===1?1:(wide?Math.min(count,4):(count<=4?2:3)));
+  handCards.classList.toggle("single",count===1);
+  handCards.style.setProperty("--columns",columns);
+  handCards.style.setProperty("--rows",Math.max(1,Math.ceil(count/columns)))
+}
 function render(){
-  var total=hand.score(discard);
-  scoreNode.textContent=total;
-  handCount.textContent=hand.size();
-  handLimit.textContent=hand.limit();
-
-  if(!hand.size()){
-    handCards.innerHTML='<div class="emptyState">Zatím tu nejsou žádné karty.</div>';
-    return
-  }
-
-  var html="";
+  document.getElementById("score").textContent=hand.score(discard);
+  document.getElementById("handCount").textContent=hand.size();
+  document.getElementById("countLabel").textContent=hand.size()===1?"karta":(hand.size()>1&&hand.size()<5?"karty":"karet");
+  emptyHand.hidden=hand.size()>0;
+  document.getElementById("resetHand").disabled=!hand.size();
+  Array.from(handCards.children).forEach(function(node){if(!hand.getCardById(node.dataset.cardId))node.remove()});
   hand.cards().forEach(function(card){
-    var reg=registryCard(card.id)||{name:card.name};
-    var state=actionDescription(card);
-    html+='<article class="handCard'+(card.blanked?" blanked":"")+'">';
-    html+='<div class="handMain">';
-    html+='<div class="strength">'+escapeHtml(card.strength)+'</div>';
-    html+='<div><div class="cardName">'+escapeHtml(reg.name)+'</div>';
-    html+='<div class="cardMeta">'+escapeHtml(card.id)+' · '+escapeHtml(suitNames[card.suit]||card.suit);
-    if(card.blanked)html+=' · VYMAZÁNA';
-    if(card.penaltyCleared)html+=' · postih odstraněn';
-    html+='</div></div>';
-    html+='<div class="points">'+escapeHtml(card.points())+'</div>';
-    html+='</div>';
-    if(state)html+='<div class="actionState'+((card.card&&card.card.action&&!card.actionData)?" actionNeeded":"")+'">'+escapeHtml(state)+'</div>';
-    html+='<div class="cardControls">';
-    if(card.card&&card.card.action){
-      html+='<button data-action="'+escapeHtml(card.id)+'">Nastavit efekt</button>';
-      if(card.actionData)html+='<button data-clear-action="'+escapeHtml(card.id)+'">Zrušit efekt</button>'
+    var node=handCards.querySelector('[data-card-id="'+card.id+'"]');
+    if(!node){
+      node=document.createElement("button");node.type="button";node.dataset.cardId=card.id;node.className="cardSnap new";
+      node.innerHTML='<img alt=""><span class="snapCaption"><span class="snapText"><span class="snapName"></span><span class="snapState"></span></span><span class="snapPoints"></span></span>';
+      node.addEventListener("animationend",function(){node.classList.remove("new")});
+      handCards.appendChild(node)
     }
-    html+='<button data-remove="'+escapeHtml(card.id)+'" class="danger ghost">Odebrat</button>';
-    html+='</div>';
-    var rules=ruleHtml(card.id);
-    if(rules)html+='<div class="cardRule">'+rules+'</div>';
-    html+='</article>'
+    var reg=registryCard(card.id),description=actionDescription(card);
+    node.classList.toggle("blanked",!!card.blanked);
+    node.classList.toggle("needsEffect",!!(card.card&&card.card.action&&!card.actionData));
+    node.setAttribute("aria-label",reg.name+", "+card.points()+" bodů"+(description?". "+description:"")+". Podrobnosti karty.");
+    node.querySelector(".snapName").textContent=reg.name;
+    node.querySelector(".snapPoints").textContent=card.points();
+    node.querySelector(".snapState").textContent=card.blanked?"Vymazaná":(node.classList.contains("needsEffect")?"Nastavit efekt":"");
+    var img=node.querySelector("img"),url="/card-images/"+card.id+".webp";
+    if(img.getAttribute("src")!==url)img.src=url
   });
-  handCards.innerHTML=html;
-
-  handCards.querySelectorAll("[data-remove]").forEach(function(el){
-    el.addEventListener("click",function(){removeCard(el.getAttribute("data-remove"))})
-  });
-  handCards.querySelectorAll("[data-action]").forEach(function(el){
-    el.addEventListener("click",function(){openAction(el.getAttribute("data-action"))})
-  });
-  handCards.querySelectorAll("[data-clear-action]").forEach(function(el){
-    el.addEventListener("click",function(){hand.undoCardAction(el.getAttribute("data-clear-action"));render()})
-  })
+  layoutCards()
 }
-
+function addConfirmed(items,source,observedAt){
+  var added=0;
+  items.forEach(function(item){
+    if(!item.confirmed||!registryCard(item.id)||hand.getCardById(item.id)||suppressedUntil[item.id]>Date.now())return;
+    if(observedAt&&(item.lastSeen!==observedAt||clearedCards[item.id]))return;
+    if(!hand.addCard(deck.getCardById(item.id)))return;
+    added++
+  });
+  if(added)render();return added
+}
+var manualDialog=document.getElementById("manualDialog"),manualSearch=document.getElementById("manualSearch");
+function renderManual(){
+  var query=CardScanner.normalizeText(manualSearch.value),rows=[];
+  baseIds().forEach(function(id){
+    var card=registryCard(id);
+    if(query&&CardScanner.normalizeText(card.name).indexOf(query)<0)return;
+    rows.push('<button type="button" class="manualCard" data-manual-id="'+id+'"'+(hand.getCardById(id)?' disabled':'')+'><img src="/card-images/'+id+'.webp" alt="" loading="lazy"><span>'+escapeHtml(card.name)+(hand.getCardById(id)?'<small>V ruce</small>':'')+'</span><b aria-hidden="true">＋</b></button>')
+  });
+  document.getElementById("manualResults").innerHTML=rows.join("")||'<p>Žádná karta neodpovídá hledání.</p>'
+}
+document.getElementById("openManual").addEventListener("click",function(){manualSearch.value="";document.getElementById("manualStatus").textContent="";renderManual();manualDialog.showModal();manualSearch.focus()});
+manualSearch.addEventListener("input",renderManual);
+document.getElementById("manualResults").addEventListener("click",function(event){
+  var node=event.target.closest("[data-manual-id]");if(!node||node.disabled)return;
+  var id=node.dataset.manualId;
+  if(!hand.addCard(deck.getCardById(id))){document.getElementById("manualStatus").textContent="Tuto kartu teď nelze přidat. Limit ruky je "+hand.limit()+" karet.";return}
+  delete suppressedUntil[id];delete clearedCards[id];render();manualDialog.close()
+});
+document.getElementById("resetHand").addEventListener("click",function(){
+  var now=Date.now();handRevision++;ignoreFramesBefore=now;
+  hand.cards().forEach(function(card){clearedCards[card.id]=now});
+  (lastSnapshot.detections||[]).forEach(function(item){if(item.id)clearedCards[item.id]=now});
+  hand.clear();currentActionCardId=null;render();setStatus("Ruka je prázdná. Namiřte na další karty.")
+});
+function updateClearedCards(snapshot){
+  var fresh=new Set((snapshot.detections||[]).filter(function(item){return item.lastSeen===snapshot.observedAt}).map(function(item){return item.id}));
+  Object.keys(clearedCards).forEach(function(id){if(fresh.has(id))clearedCards[id]=snapshot.observedAt;else if(snapshot.observedAt-clearedCards[id]>1500)delete clearedCards[id]})
+}
+function storageWarning(capture){return capture&&capture.enabled&&!capture.stored?(capture.error==="quota"||capture.error==="disk_space"?"Úložiště fotografií je plné. Snímek se neuložil.":"Fotografii se nepodařilo uložit."):""}
+handCards.addEventListener("click",function(event){var node=event.target.closest("[data-card-id]");if(node)openCard(node.dataset.cardId)});
+document.getElementById("removeCard").addEventListener("click",function(){
+  if(!currentActionCardId)return;
+  suppressedUntil[currentActionCardId]=Date.now()+8000;hand.deleteCardById(currentActionCardId);
+  currentActionCardId=null;actionDialog.close();render()
+});
+document.getElementById("clearEffect").addEventListener("click",function(){if(currentActionCardId){hand.undoCardAction(currentActionCardId);render();actionDialog.close()}});
 function optionHtml(id){
   var reg=registryCard(id);
   return '<option value="'+escapeHtml(id)+'">'+escapeHtml(reg?reg.name:id)+'</option>'
 }
-function openAction(id){
+function openCard(id){
   var card=hand.getCardById(id);
   if(!card)return;
   currentActionCardId=id;
   var reg=registryCard(id);
   actionTitle.textContent=reg?reg.name:id;
   var body="";
+  saveAction.hidden=!(card.card&&card.card.action);
+  document.getElementById("clearEffect").hidden=!card.actionData;
 
   if(id==="FR09"){
     var targets=hand.cards().filter(function(c){return c.id!==id&&(c.suit==="flood"||c.suit==="flame")});
@@ -192,10 +168,10 @@ function openAction(id){
     body+='<select id="actionTarget">'+doppelTargets.map(function(c){return optionHtml(c.id)}).join("")+'</select>';
     saveAction.disabled=!doppelTargets.length
   }else{
-    body="<p>Tato karta nevyžaduje konfiguraci.</p>";
+    body="";
     saveAction.disabled=true
   }
-  actionBody.innerHTML=body;
+  actionBody.innerHTML="<p>"+escapeHtml(actionDescription(card))+"</p>"+body+'<div class="cardRules">'+ruleHtml(id)+"</div>";
   actionDialog.showModal()
 }
 saveAction.addEventListener("click",function(){
@@ -213,237 +189,77 @@ saveAction.addEventListener("click",function(){
   setTimeout(render,0)
 });
 
-function prepareOverlay(){
-  var rect=overlay.getBoundingClientRect();
-  var dpr=Math.min(window.devicePixelRatio||1,2);
-  var w=Math.max(1,Math.round(rect.width*dpr)),h=Math.max(1,Math.round(rect.height*dpr));
-  if(overlay.width!==w||overlay.height!==h){
-    overlay.width=w;overlay.height=h
-  }
-  var ctx=overlay.getContext("2d");
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  return{ctx:ctx,width:rect.width,height:rect.height,dpr:dpr}
-}
-function mapBoxToOverlay(box,width,height){
-  var vw=camera.videoWidth||1,vh=camera.videoHeight||1;
-  var scale=Math.max(width/vw,height/vh);
-  var renderedW=vw*scale,renderedH=vh*scale;
-  var ox=(width-renderedW)/2,oy=(height-renderedH)/2;
-  return{
-    x:ox+box.x0*vw*scale,
-    y:oy+box.y0*vh*scale,
-    w:(box.x1-box.x0)*vw*scale,
-    h:(box.y1-box.y0)*vh*scale
-  }
-}
-function drawLabel(ctx,box,text,confirmed){
-  var pad=4;
-  ctx.font="700 13px system-ui,-apple-system,sans-serif";
-  var tw=ctx.measureText(text).width;
-  var labelY=Math.max(2,box.y-22);
-  ctx.fillStyle=confirmed?"rgba(20,115,67,.92)":"rgba(173,118,23,.92)";
-  ctx.fillRect(box.x,labelY,tw+pad*2,20);
-  ctx.fillStyle="#fff";
-  ctx.fillText(text,box.x+pad,labelY+14)
-}
-function drawOverlay(confirmed,candidates){
-  var surface=prepareOverlay(),ctx=surface.ctx,w=surface.width,h=surface.height;
-  ctx.clearRect(0,0,w,h);
-  confirmed.forEach(function(item){
+function clearOverlay(){var ctx=overlay.getContext("2d");ctx.clearRect(0,0,overlay.width,overlay.height)}
+function drawOverlay(snapshot){
+  var rect=overlay.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);
+  overlay.width=Math.max(1,Math.round(rect.width*dpr));overlay.height=Math.max(1,Math.round(rect.height*dpr));
+  var ctx=overlay.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,rect.width,rect.height);
+  if(!snapshot.frame||Math.abs(snapshot.frame.width/snapshot.frame.height-rect.width/rect.height)>.06)return;
+  (snapshot.detections||[]).concat(snapshot.candidates||[]).forEach(function(item){
     if(!item.bbox)return;
-    var b=mapBoxToOverlay(item.bbox,w,h);
-    ctx.lineWidth=item.confirmed?3:2;
-    ctx.strokeStyle=item.confirmed?"rgba(79,220,137,.98)":"rgba(240,190,75,.95)";
-    ctx.strokeRect(b.x,b.y,b.w,b.h);
-    var pct=Math.round((item.bestScore||item.score||0)*100);
-    drawLabel(ctx,b,item.name+" "+pct+"%",item.confirmed)
-  });
-  (candidates||[]).forEach(function(item){
-    if(!item.bbox)return;
-    var b=mapBoxToOverlay(item.bbox,w,h);
-    ctx.lineWidth=1.5;
-    ctx.setLineDash([5,4]);
-    ctx.strokeStyle="rgba(240,190,75,.72)";
-    ctx.strokeRect(b.x,b.y,b.w,b.h);
-    ctx.setLineDash([]);
-    var raw=(item.rawText||item.suggestedName||"?").trim();
-    if(raw.length>24)raw=raw.slice(0,23)+"…";
-    drawLabel(ctx,b,"? "+raw,false)
+    var box=item.bbox;ctx.strokeStyle=item.confirmed?"#9be8ac":"#e5bd73";ctx.lineWidth=item.confirmed?2:1;
+    ctx.setLineDash(item.id?[]:[4,4]);ctx.strokeRect(box.x0*rect.width,box.y0*rect.height,(box.x1-box.x0)*rect.width,(box.y1-box.y0)*rect.height)
   })
 }
-function clearOverlay(){
-  var surface=prepareOverlay();
-  surface.ctx.clearRect(0,0,surface.width,surface.height)
+function stopPreview(){generation++;if(liveSession){liveSession.stop();liveSession=null}CardScanner.stopCamera(camera);clearOverlay()}
+function photoMode(title,hint){
+  cameraFrame.classList.add("photoMode");cameraFrame.setAttribute("role","button");cameraFrame.tabIndex=0;
+  cameraFrame.setAttribute("aria-label","Vyfotit karty");
+  cameraTitle.textContent=title||"Klepněte a vyfoťte karty";
+  cameraHint.textContent=hint||"Otevře se fotoaparát telefonu.";
+  placeholder.hidden=!!photoUrl;setStatus("")
 }
-function renderLiveSummary(snapshot){
-  var list=(snapshot.detections||[]).slice(0,10);
-  if(!list.length){
-    detections.innerHTML='<div class="emptyState compact">Čekám na titulky karet…</div>';
-    return
-  }
-  detections.innerHTML=list.map(function(item){
-    var state=item.confirmed?"potvrzeno":"ověřuji";
-    var inHand=hand.getCardById(item.id)?" · v ruce":"";
-    return '<div class="detectCard liveDetect '+(item.confirmed?"confirmed":"candidate")+'"><strong>'+escapeHtml(item.name)+'</strong><small>'+Math.round((item.bestScore||item.score)*100)+'% · '+state+inHand+'</small></div>'
-  }).join("")
-}
-
-function startLive(){
-  if(liveSession)liveSession.stop();
-  liveRunning=true;
-  liveSession=CardScanner.createLiveScanner(camera,{
-    onStatus:function(info){
-      if(info.state==="loading")setStatus(info.message||"Načítám OCR…");
-      else setStatus(info.message||"Živý scanner běží.","ok")
-    },
-    onUpdate:function(snapshot){
-      lastLiveSnapshot=snapshot;
-      lastDetections=snapshot.detections||[];
-      var added=autoAddConfirmed(lastDetections);
-      drawOverlay(lastDetections,snapshot.candidates||[]);
-      renderLiveSummary(snapshot);
-      var confirmed=lastDetections.filter(function(d){return d.confirmed}).length;
-      var extra=added.length?(" · přidáno: "+added.join(", ")):"";
-      setStatus("Živě: "+lastDetections.length+" titulů, "+confirmed+" potvrzených · průchod "+snapshot.angle+"° / "+snapshot.elapsedMs+" ms"+extra,"ok")
-    },
-    onError:function(e){
-      setStatus(e.message||String(e),"error")
-    }
-  })
-}
-function stopLive(){
-  liveRunning=false;
-  if(liveSession){liveSession.stop();liveSession=null}
-  clearOverlay()
-}
-
-startButton.addEventListener("click",async function(){
+async function startPreview(){
+  if(starting||liveSession||photoBusy||document.hidden)return;
+  if(!allowLive){photoMode("Klepněte a vyfoťte karty",window.isSecureContext?"Otevře se fotoaparát telefonu.":"Na této HTTP adrese lze fotit. Živý náhled vyžaduje HTTPS.");return}
+  starting=true;var ticket=++generation;
+  placeholder.hidden=false;cameraTitle.textContent="Povolte přístup ke kameře";cameraHint.textContent="Fotoaparát se spustí automaticky.";
   try{
-    setStatus("Spouštím kameru…");
-    await CardScanner.startCamera(camera);
-    cameraPlaceholder.style.display="none";
-    startButton.disabled=true;
-    stopButton.disabled=false;
-    startLive()
-  }catch(e){
-    setStatus(e.message||String(e),"error")
-  }
-});
-stopButton.addEventListener("click",function(){
-  stopLive();
-  CardScanner.stopCamera(camera);
-  cameraPlaceholder.style.display="";
-  startButton.disabled=false;
-  stopButton.disabled=true;
-  detections.innerHTML="";
-  setStatus("Živý scanner zastaven.")
-});
-window.addEventListener("resize",function(){
-  if(liveRunning)drawOverlay(lastLiveSnapshot.detections||[],lastLiveSnapshot.candidates||[])
-});
-
-async function recognizePhoto(source){
-  detections.innerHTML="";
-  lastDetections=[];
-  try{
-    setStatus("Analyzuji titulky na fotografii…","",0);
-    var found=await CardScanner.recognize(source,function(message){
-      setStatus(message.status||"OCR","",typeof message.progress==="number"?message.progress:undefined)
+    var stream=await CardScanner.startCamera(camera);
+    if(ticket!==generation||photoBusy||document.hidden){CardScanner.stopCamera(camera);return}
+    cameraFrame.classList.remove("photoMode");cameraFrame.removeAttribute("role");cameraFrame.removeAttribute("tabindex");
+    placeholder.hidden=true;photoPreview.hidden=true;
+    liveSession=CardScanner.createLiveScanner(camera,{
+      onStatus:function(info){setStatus(info.state==="loading"?"Připojuji scanner…":"Namiřte na názvy karet")},
+      onUpdate:function(snapshot){
+        lastSnapshot=snapshot;updateClearedCards(snapshot);
+        var added=snapshot.capturedAt>ignoreFramesBefore?addConfirmed(snapshot.detections||[],snapshot.frame,snapshot.observedAt):0;
+        drawOverlay(snapshot);var warning=storageWarning(snapshot.capture);
+        setStatus(warning||(added?"Přidáno "+added+" · "+hand.size()+" karet v ruce":"Hledám další karty…"),warning?"error":(added?"ok":""))
+      },
+      onError:function(){setStatus("Scanner se znovu připojuje…","error")}
     });
-    lastDetections=found;
-    var added=autoAddConfirmed(found);
-    renderPhotoDetections(found);
-    if(found.length){
-      setStatus("Fotografie: "+found.length+" rozpoznaných titulů"+(added.length?" · automaticky přidáno "+added.length:""),"ok")
-    }else{
-      setStatus("Na fotografii jsem nenašel dostatečně jistý titul.","error")
-    }
-  }catch(e){
-    setStatus(e.message||String(e),"error")
-  }
+    stream.getVideoTracks().forEach(function(track){track.addEventListener("ended",function(){if(ticket===generation){stopPreview();allowLive=false;photoMode("Fotoaparát se odpojil","Klepnutím můžete vyfotit další karty.")}})})
+  }catch(error){
+    allowLive=false;
+    photoMode("Klepněte a vyfoťte karty",error.name==="NotAllowedError"?"Živou kameru povolte v nastavení prohlížeče. Focení je dostupné klepnutím.":"Živý náhled není dostupný. Klepnutím otevřete fotoaparát.")
+  }finally{starting=false}
 }
+cameraFrame.addEventListener("click",function(){if(cameraFrame.classList.contains("photoMode")&&!photoBusy)upload.click()});
+cameraFrame.addEventListener("keydown",function(event){if((event.key==="Enter"||event.key===" ")&&cameraFrame.classList.contains("photoMode")){event.preventDefault();if(!photoBusy)upload.click()}});
 upload.addEventListener("change",async function(){
-  var file=upload.files&&upload.files[0];
-  if(file)await recognizePhoto(file)
+  var file=upload.files&&upload.files[0];upload.value="";if(!file||photoBusy)return;
+  photoBusy=true;var revision=handRevision;stopPreview();cameraFrame.setAttribute("aria-busy","true");
+  try{
+    if(photoUrl)URL.revokeObjectURL(photoUrl);photoUrl=URL.createObjectURL(file);
+    photoPreview.src=photoUrl;await photoPreview.decode();photoPreview.hidden=false;placeholder.hidden=true;
+    setStatus("Čtu názvy karet…");
+    var originalCapture,scanCapture;
+    try{originalCapture=await CardScanner.archivePhoto(file)}catch(error){originalCapture={enabled:true,stored:false,error:"write_failed"}}
+    var found=await CardScanner.recognize(photoPreview,function(info){if(info.capture)scanCapture=info.capture},originalCapture&&originalCapture.id);
+    var added=revision===handRevision?addConfirmed(found,photoPreview):0;
+    var warning=storageWarning(scanCapture)||storageWarning(originalCapture);
+    if(originalCapture&&!originalCapture.stored&&scanCapture&&scanCapture.stored)warning="Originál se neuložil, zmenšená fotka je uložená.";
+    setStatus(warning||(revision!==handRevision?"Ruka je prázdná · Vyfoťte další karty":(added?"Přidáno "+added+" · Klepněte pro další fotku":(found.length?"Karty už jsou v ruce · Klepněte pro další fotku":"Názvy nejsou čitelné · Zkuste další fotku"))),warning?"error":(added?"ok":""));
+    cameraFrame.classList.add("photoMode");cameraFrame.setAttribute("role","button");cameraFrame.tabIndex=0
+  }catch(error){photoMode("Fotografii se nepodařilo načíst","Klepnutím zkuste vyfotit karty znovu.");setStatus(error.message||"Zkuste další fotografii.","error")}
+  finally{photoBusy=false;cameraFrame.removeAttribute("aria-busy")}
 });
-function renderPhotoDetections(items){
-  if(!items.length){detections.innerHTML="";return}
-  detections.innerHTML=items.map(function(item){
-    var state=hand.getCardById(item.id)?"v ruce":(item.confirmed?"potvrzeno":"nejisté");
-    return '<div class="detectCard liveDetect '+(item.confirmed?"confirmed":"candidate")+'"><strong>'+escapeHtml(item.name)+'</strong><small>'+Math.round((item.bestScore||item.score)*100)+'% · '+state+'</small></div>'
-  }).join("")
-}
-
-function renderManualResults(){
-  var q=CardScanner.normalizeText(manualSearch.value);
-  manualMatches=baseIds().map(function(id){
-    var card=registryCard(id);
-    var normalized=CardScanner.normalizeText(card.name);
-    var score=q?CardScanner.similarity(q,card.name):1;
-    var contains=q&&normalized.indexOf(q)>=0;
-    return{id:id,name:card.name,strength:deck.getCardById(id).strength,score:contains?1:score}
-  }).filter(function(item){return !q||item.score>=.42})
-    .sort(function(a,b){return b.score-a.score||a.name.localeCompare(b.name,"cs")});
-
-  if(!manualMatches.length){
-    manualResults.innerHTML='<div class="emptyState">Žádná odpovídající karta.</div>';
-    return
-  }
-  manualResults.innerHTML=manualMatches.map(function(item){
-    return '<button type="button" class="manualResult" data-manual-id="'+item.id+'"><span>'+escapeHtml(item.name)+'</span><small>'+item.strength+'</small></button>'
-  }).join("");
-
-  manualResults.querySelectorAll("[data-manual-id]").forEach(function(el){
-    el.addEventListener("click",function(){
-      var id=el.getAttribute("data-manual-id");
-      manualStatus.textContent="";
-      if(addCard(id,"manual")){
-        manualStatus.textContent="Přidána: "+registryCard(id).name;
-        manualSearch.value="";
-        renderManualResults()
-      }
-    })
-  })
-}
-manualSearch.addEventListener("input",renderManualResults);
-manualSearch.addEventListener("focus",renderManualResults);
-manualSearch.addEventListener("keydown",function(e){
-  if(e.key==="Enter"){
-    e.preventDefault();
-    document.getElementById("manualAdd").click()
-  }
-});
-document.getElementById("manualAdd").addEventListener("click",function(){
-  manualStatus.textContent="";
-  if(!manualMatches.length){
-    manualStatus.textContent="Nejdřív vyber nebo vyhledej kartu.";
-    return
-  }
-  var id=manualMatches[0].id;
-  if(addCard(id,"manual")){
-    manualStatus.textContent="Přidána: "+registryCard(id).name;
-    manualSearch.value="";
-    renderManualResults()
-  }
-});
-document.getElementById("resetHand").addEventListener("click",function(){
-  if(liveRunning){
-    (lastDetections||[]).forEach(function(item){
-      if(item.id)suppressedUntil[item.id]=Date.now()+5000
-    })
-  }
-  hand.clear();
-  manualStatus.textContent="";
-  render();
-  renderManualResults();
-  if(!liveRunning)detections.innerHTML=""
-});
-
-if("serviceWorker"in navigator){
-  window.addEventListener("load",function(){
-    navigator.serviceWorker.register("./service-worker.js").catch(function(){})
-  })
-}
-render();
-renderManualResults()
+document.addEventListener("visibilitychange",function(){if(document.hidden)stopPreview();else startPreview()});
+window.addEventListener("pagehide",stopPreview);
+window.addEventListener("pageshow",function(event){if(event.persisted)startPreview()});
+window.addEventListener("resize",function(){layoutCards();clearOverlay()});
+if("ResizeObserver"in window)new ResizeObserver(layoutCards).observe(handCards);
+if("serviceWorker"in navigator&&window.isSecureContext)window.addEventListener("load",function(){navigator.serviceWorker.register("./service-worker.js").catch(function(){})});
+render();startPreview()
 })();

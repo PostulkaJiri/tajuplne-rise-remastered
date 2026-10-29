@@ -1,0 +1,58 @@
+name: tajuplne-rise-remastered
+
+services:
+  tajuplne-rise:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tajuplne-rise-remastered-ocr
+    restart: unless-stopped
+    ports:
+      - "192.168.0.249:18080:8000"
+    environment:
+      PADDLE_OCR_LANG: ${PADDLE_OCR_LANG:-cs}
+      PADDLE_OCR_VERSION: ${PADDLE_OCR_VERSION:-PP-OCRv5}
+      PADDLE_DETECTION_MODEL: ${PADDLE_DETECTION_MODEL:-PP-OCRv5_mobile_det}
+      PADDLE_RECOGNITION_MODEL: ${PADDLE_RECOGNITION_MODEL:-latin_PP-OCRv5_mobile_rec}
+      PADDLE_DETECTION_MAX_SIDE: ${PADDLE_DETECTION_MAX_SIDE:-960}
+      PADDLE_DETECTION_BOX_THRESHOLD: ${PADDLE_DETECTION_BOX_THRESHOLD:-0.50}
+      PADDLE_DEVICE: cpu
+      PADDLE_CPU_THREADS: 2
+      OMP_NUM_THREADS: 2
+      OPENBLAS_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      OPENCV_IO_MAX_IMAGE_PIXELS: 25000000
+      SCAN_ROTATIONS: ${SCAN_ROTATIONS:-0,-90}
+      MATCH_ACCEPT_SCORE: ${MATCH_ACCEPT_SCORE:-78}
+      MATCH_HIGH_SCORE: ${MATCH_HIGH_SCORE:-92}
+      MATCH_MIN_MARGIN: ${MATCH_MIN_MARGIN:-7}
+      MIN_OCR_SCORE: ${MIN_OCR_SCORE:-0.32}
+      TITLE_PREFILTER: ${TITLE_PREFILTER:-true}
+      MIN_TITLE_STYLE: ${MIN_TITLE_STYLE:-0.30}
+      SAVE_CAPTURED_IMAGES: ${SAVE_CAPTURED_IMAGES:-true}
+      CAPTURE_STORAGE_MAX_BYTES: ${CAPTURE_STORAGE_MAX_BYTES:-5000000000}
+      MAX_ORIGINAL_PHOTO_BYTES: ${MAX_ORIGINAL_PHOTO_BYTES:-25000000}
+      DEBUG_SAVE_FAILED_SCANS: ${DEBUG_SAVE_FAILED_SCANS:-false}
+    cpus: 2.0
+    mem_limit: 4g
+    pids_limit: 128
+    volumes:
+      - paddle-cache:/root/.paddlex
+      - ./data/card-originals:/app/card-originals:ro
+      - ./data/captures:/app/captures
+    networks:
+      - tajuplne-rise-internal
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5)"]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+      start_period: 180s
+
+networks:
+  tajuplne-rise-internal:
+    name: tajuplne-rise-remastered-internal
+
+volumes:
+  paddle-cache:
+    name: tajuplne-rise-remastered-paddle-cache

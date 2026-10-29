@@ -1,0 +1,19 @@
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+backend/tests/fixtures/scans/*
+!backend/tests/fixtures/scans/.gitkeep
+
+# Local build and evaluation evidence
+*.log
+backend/fixture-results.json
+backend/cache-*.json
+backend/smoke-after-restart.json
+
+testovaci-data/
+
+backend/local-ocr/
+
+# Private card originals and captured photographs
+data/

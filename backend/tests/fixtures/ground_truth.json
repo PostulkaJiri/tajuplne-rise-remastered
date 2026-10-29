@@ -1,0 +1,603 @@
+[
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_21_40 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Elementál vzduchu",
+      "Dvojník",
+      "Strom světa",
+      "Ochranná runa",
+      "Kovárna",
+      "Královna",
+      "Kniha proměn"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "83176220e83a49d59e4c1b76395bb315febdb31a89c59cb9d94d7538ec130a6f",
+    "notes": "Seven identifiable title banners; an additional almost fully occluded card has no readable title and is not an expected detection."
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_21_48 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Tornádo",
+      "Těžká jízda",
+      "Elfský luk",
+      "Nekromant",
+      "Elementál vody",
+      "Bojová vzducholoď",
+      "Kouř"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "8562f3b075a27bd25b9b986dcfbaf4a05bb1b21cc65269478d5714a261257e62"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_21_55 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Tornádo",
+      "Těžká jízda",
+      "Elfský luk",
+      "Nekromant",
+      "Elementál vody",
+      "Bojová vzducholoď",
+      "Kouř"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "bb1c0b52bd0b1f94cf930afed09e62dd2947ac328b05c189c1becad1014a2971"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_03 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Nejvyšší mág",
+      "Drak",
+      "Elementál ohně",
+      "Zvonice",
+      "Kethský štít",
+      "Jednorožec",
+      "Bouře"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "7d072a8436b7c06a9136004caa6cd71a5c67dd5bc1619e4d994674eaa730f9e0"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_10 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Válečná loď",
+      "Šašek",
+      "Magická hůl",
+      "Kethský meč",
+      "Les",
+      "Pán šelem",
+      "Požár"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "bb8fb3f44e94f5f844480fd098a4c61e80124105584f0cce1788cd725ed3a8b2"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_19 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Ostrov",
+      "Hora",
+      "Svíčka",
+      "Elementál země",
+      "Blesk",
+      "Velitel",
+      "Hydra"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "30a6c42f87629d34b9d76c6de5af955eb7385a07a169b3504ae867261e34ac05"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_27 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Král",
+      "Stoletá voda",
+      "Fontána života",
+      "Sběratel",
+      "Rytířky",
+      "Elfí lučištníci",
+      "Bažina"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "9234edc0245162a73a78ad48f6d81bcc46999d829ba07dfb02f418d592a14c28"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_35 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Hraničáři",
+      "Princezna",
+      "Kouzelnice",
+      "Přelud",
+      "Jeskyně",
+      "Císařovna",
+      "Válečný oř"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "c2e9e41a0eb4618f15a58a2c739e564f56ad72d28af7a0dda05449f702f0afa5"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_42 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Elementál vzduchu",
+      "Dvojník",
+      "Strom světa",
+      "Bazilišek",
+      "Sněhová vánice",
+      "Trpasličí pěchota",
+      "Ochranná runa"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "4ffa7035f12541223a014d73a3fb4f9274257780098a9a074c7ea3956eb0c58c"
+  },
+  {
+    "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_49 PM.jpg",
+    "group": "photo",
+    "expected": [
+      "Sběratel",
+      "Rytířky",
+      "Elfí lučištníci",
+      "Bažina",
+      "Bazilišek",
+      "Sněhová vánice",
+      "Trpasličí pěchota"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-27",
+    "sha256": "42cbb4fc0d90dfa229139b142892a35a7552d9c1e8942717b02b5603cec3ad3a"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_37 PM-1.png",
+    "group": "original",
+    "expected": [
+      "Elfí lučištníci",
+      "Bazilišek",
+      "Sněhová vánice",
+      "Elementál vody",
+      "Nejvyšší mág",
+      "Krystal řádu",
+      "Magická hůl",
+      "Velitel",
+      "Císařovna"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "18e1ca77e738612611d0fdb35f086e2631135b84ee2dede3a20e70b5bb99b4cd"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_38 PM-2.png",
+    "group": "original",
+    "expected": [
+      "Rytířky",
+      "Strom světa",
+      "Trpasličí pěchota",
+      "Kouř",
+      "Elementál ohně",
+      "Šašek",
+      "Svíčka",
+      "Hydra",
+      "Jeskyně"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "39b146ddee98730c3e6c38640eb811f57f5c69a19a676a2d0dd63f18802b0287"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_39 PM-3.png",
+    "group": "original",
+    "expected": [
+      "Fontána života",
+      "Elementál vzduchu",
+      "Kovárna",
+      "Tornádo",
+      "Drak",
+      "Jednorožec",
+      "Pán šelem",
+      "Ostrov",
+      "Přelud"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "d9def1d30e897126f600112f87bc824996e1597f75847843dc269812f4cf06f2"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_40 PM-4.png",
+    "group": "original",
+    "expected": [
+      "Sběratel",
+      "Dvojník",
+      "Ochranná runa",
+      "Nekromant",
+      "Zvonice",
+      "Válečná loď",
+      "Elementál země",
+      "Hora",
+      "Kouzelnice"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "fe459982288fe6f6b0fec955c5514ac34c8166459690ac1108fccc525aca977c"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_40 PM-5.png",
+    "group": "original",
+    "expected": [
+      "Stoletá voda",
+      "Bažina",
+      "Královna",
+      "Měňavec",
+      "Bojová vzducholoď",
+      "Kethský štít",
+      "Les",
+      "Blesk",
+      "Princezna"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "f620f0ad80b980880a5ae24622c7b12fc0fa7f26648843acf1339a1d85892119"
+  },
+  {
+    "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_41 PM-6.png",
+    "group": "original",
+    "expected": [
+      "Válečný oř",
+      "Král",
+      "Kniha proměn",
+      "Elfský luk",
+      "Těžká jízda",
+      "Bouře",
+      "Kethský meč",
+      "Požár",
+      "Hraničáři"
+    ],
+    "labelSource": "Manual visual reading of all nine title banners, 2026-10-27",
+    "sha256": "12c9fd49ec30c82c48fa6c082d1b0cded3cf1a543c8ac5be27856336926f1a98"
+  },
+  {
+    "image": "captures/3d1681d5fad29f127cdc5197ba2c4db236d65e974b05b6ce8a80e9e25324a669.jpg",
+    "group": "capture",
+    "expected": [
+      "Elfský luk",
+      "Elementál vody",
+      "Nekromant",
+      "Nejvyšší mág",
+      "Bojová vzducholoď",
+      "Kouř",
+      "Těžká jízda",
+      "Tornádo"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "3d1681d5fad29f127cdc5197ba2c4db236d65e974b05b6ce8a80e9e25324a669",
+    "originalCaptureId": "25dc58b68b7a87ae5650934939352af8d1eaebbc28958e5880523551357e76a2",
+    "notes": "Eight complete readable title banners; incomplete titles cut off at the right edge are excluded."
+  },
+  {
+    "image": "captures/80e70d6644737eeaff922de30cfb37be649e8a55f68bc6efbca90d6c32d49f82.jpg",
+    "group": "capture",
+    "expected": [
+      "Rytířky",
+      "Sběratel",
+      "Elfí lučištníci",
+      "Drak",
+      "Elementál ohně",
+      "Zvonice",
+      "Jednorožec"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "80e70d6644737eeaff922de30cfb37be649e8a55f68bc6efbca90d6c32d49f82",
+    "originalCaptureId": "1cd1a0f0a64b7a450746f45653bcbae2439813deda08e22b48eca35ec0d55d43"
+  },
+  {
+    "image": "captures/2d241e7e4c854929aed28773e0590725073a09d16fd4afc5060a78f5548d1066.jpg",
+    "group": "capture",
+    "expected": [
+      "Rytířky",
+      "Sběratel",
+      "Elfí lučištníci",
+      "Drak",
+      "Elementál ohně",
+      "Zvonice",
+      "Jednorožec"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "2d241e7e4c854929aed28773e0590725073a09d16fd4afc5060a78f5548d1066",
+    "originalCaptureId": "8980803c5fdaf80dcdd37bc19623e177347e7a312c4fbbaeb28661bad509f9c9"
+  },
+  {
+    "image": "captures/4c9accf10c0874595391091a9f77904d9de43b2a43da4c6654d402ab4cad5ee5.jpg",
+    "group": "capture",
+    "expected": [
+      "Válečná loď",
+      "Bouře",
+      "Les",
+      "Kethský štít",
+      "Pán šelem",
+      "Kethský meč",
+      "Požár"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "4c9accf10c0874595391091a9f77904d9de43b2a43da4c6654d402ab4cad5ee5",
+    "originalCaptureId": "f0d30b278d9dd364fd4ac93fa2306a61e62796ac8a898920eb48d55511bd1531"
+  },
+  {
+    "image": "captures/455ae0ec836f0b4282796c8e0204d16338a82f7e771422578164745421f55055.jpg",
+    "group": "capture",
+    "expected": [
+      "Válečná loď",
+      "Bouře",
+      "Les",
+      "Kethský štít",
+      "Pán šelem",
+      "Kethský meč",
+      "Požár"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "455ae0ec836f0b4282796c8e0204d16338a82f7e771422578164745421f55055",
+    "originalCaptureId": "f9288842ab184871b696d25c7d77443aa0bcd8f126ac224079cbc221cb0b48f8"
+  },
+  {
+    "image": "captures/167cb57418070fe8eebf50930793793cc4abc0ea62ed57596fc77c2488e46b9b.jpg",
+    "group": "capture",
+    "expected": [
+      "Hydra",
+      "Ostrov",
+      "Stoletá voda",
+      "Blesk",
+      "Válečný oř",
+      "Zvonice",
+      "Nejvyšší mág"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "167cb57418070fe8eebf50930793793cc4abc0ea62ed57596fc77c2488e46b9b",
+    "originalCaptureId": "80cc7c403ae2090f536e48ac35289f4db8141b3af09a091ec219833be336a514"
+  },
+  {
+    "image": "captures/2f7ba8038840b83b92821239fa5fcdd4e0425af16728054d23fa2e3d22d767d0.jpg",
+    "group": "capture",
+    "expected": [
+      "Princezna",
+      "Hora",
+      "Magická hůl",
+      "Kouzelnice",
+      "Elementál země",
+      "Jednorožec",
+      "Fontána života"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "2f7ba8038840b83b92821239fa5fcdd4e0425af16728054d23fa2e3d22d767d0",
+    "originalCaptureId": "7abf8761c4e197cdc7a5e2445a6e38e15abd3d8bfb66f509d15b465c5c4ecf66",
+    "notes": "Cards photographed sideways, approximately 90 degrees."
+  },
+  {
+    "image": "captures/690bd7bb5c32d8ca97f989ef7f5bb19b8aa85a1a44b0d2c2f0e764012ae8a7ae.jpg",
+    "group": "capture",
+    "expected": [
+      "Princezna",
+      "Magická hůl",
+      "Hora",
+      "Jednorožec",
+      "Fontána života",
+      "Elementál země",
+      "Kouzelnice"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "690bd7bb5c32d8ca97f989ef7f5bb19b8aa85a1a44b0d2c2f0e764012ae8a7ae",
+    "originalCaptureId": "8ac9429c4cefa3701dd656cf74d8fc496e39c9bda874bc5e17c3094021048a3f"
+  },
+  {
+    "image": "captures/f8bfad129cf4b55cdcf022c79c2989d34bbb9e7d418d40bbe7152e837b4ff0eb.jpg",
+    "group": "capture",
+    "expected": [
+      "Tornádo",
+      "Měňavec",
+      "Les",
+      "Hydra",
+      "Kouzelnice",
+      "Válečný oř",
+      "Elfský luk"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "f8bfad129cf4b55cdcf022c79c2989d34bbb9e7d418d40bbe7152e837b4ff0eb",
+    "originalCaptureId": "2fa9387e0fa62c7d82e9b0c63d29b57fad2fac400cc8d01303e03c56d5a89957",
+    "notes": "Cards photographed sideways, approximately 90 degrees."
+  },
+  {
+    "image": "captures/7ec548aabf15613ce1cf8e701179a0d4dfa49c0682e1d5a38deb05f42f305cf7.jpg",
+    "group": "capture",
+    "expected": [
+      "Tornádo",
+      "Měňavec",
+      "Les",
+      "Hydra",
+      "Kouzelnice",
+      "Válečný oř",
+      "Elfský luk"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "7ec548aabf15613ce1cf8e701179a0d4dfa49c0682e1d5a38deb05f42f305cf7",
+    "originalCaptureId": "87929ddc15e5e94e5db1abc4507cb3744830c2cd53a0bb390c8bd5395583ba00",
+    "notes": "Cards photographed sideways, approximately 90 degrees."
+  },
+  {
+    "image": "captures/dae9f1cd274a47bd56d9669617f5c9abc5cf77472c9f4805a817034c97304db5.jpg",
+    "group": "capture",
+    "expected": [
+      "Elfský luk",
+      "Tornádo",
+      "Hydra",
+      "Les",
+      "Měňavec",
+      "Válečný oř",
+      "Kouzelnice"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "dae9f1cd274a47bd56d9669617f5c9abc5cf77472c9f4805a817034c97304db5",
+    "originalCaptureId": "c70d233c922faeed8e27232f959edb9f2653af05392bd44651bcc108212f7c73"
+  },
+  {
+    "image": "captures/dc6047becbbb8bb7c29eba6f0c7a33f17528c5c606c6edf55c5ab29d68e66a11.jpg",
+    "group": "capture",
+    "expected": [
+      "Bouře",
+      "Blesk",
+      "Kouř",
+      "Nekromant",
+      "Král",
+      "Těžká jízda",
+      "Rytířky",
+      "Sběratel"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "dc6047becbbb8bb7c29eba6f0c7a33f17528c5c606c6edf55c5ab29d68e66a11",
+    "originalCaptureId": "91978fd95e2c64832563a3eb900cb22be6b4cf1623da6ab703ff2a641d77138f",
+    "notes": "Cards photographed sideways, approximately 90 degrees."
+  },
+  {
+    "image": "captures/3d81537f0aad6c79270ab0b40bf0a5558e326331f4fc326338a325420c60d19b.jpg",
+    "group": "capture",
+    "expected": [
+      "Šašek",
+      "Ochranná runa",
+      "Těžká jízda",
+      "Císařovna",
+      "Bojová vzducholoď",
+      "Magická hůl",
+      "Nekromant",
+      "Sběratel"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "3d81537f0aad6c79270ab0b40bf0a5558e326331f4fc326338a325420c60d19b",
+    "originalCaptureId": "4f6bf46610d24047053cb3e51385ef30e7f1b450c20e35ce987f6b6a7277727f"
+  },
+  {
+    "image": "captures/02e62b10f9bf45ab739ffa6a3339d452a7178b35665b2bda17a5931c918c4e2d.jpg",
+    "group": "capture",
+    "expected": [
+      "Stoletá voda",
+      "Blesk",
+      "Nejvyšší mág",
+      "Bouře",
+      "Tornádo",
+      "Kouř",
+      "Elementál vody"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "02e62b10f9bf45ab739ffa6a3339d452a7178b35665b2bda17a5931c918c4e2d",
+    "originalCaptureId": "5ef4cae405794577f2d1d0e0f3a82b7b31024b294bebabc7435ea51428f8b657"
+  },
+  {
+    "image": "captures/93f9e1153d7763454d33aeb17a3626c0ecf27593646f490d032962c68863705d.jpg",
+    "group": "capture",
+    "expected": [
+      "Sněhová vánice",
+      "Fontána života",
+      "Kethský meč",
+      "Kovárna",
+      "Císařovna",
+      "Jednorožec",
+      "Strom světa"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "93f9e1153d7763454d33aeb17a3626c0ecf27593646f490d032962c68863705d",
+    "originalCaptureId": "4e25a564364157bfa240b39e56acafb7945bb054a6c3bc9ec9e968b46a5c3748"
+  },
+  {
+    "image": "captures/214aa1259fb1a33b580e0da844c93cba8f7e4c5476735fdcc1143e8e186769e2.jpg",
+    "group": "capture",
+    "expected": [
+      "Kethský štít",
+      "Elementál země",
+      "Zvonice",
+      "Pán šelem",
+      "Princezna",
+      "Bojová vzducholoď",
+      "Trpasličí pěchota"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "214aa1259fb1a33b580e0da844c93cba8f7e4c5476735fdcc1143e8e186769e2",
+    "originalCaptureId": "d59e920dddb701b49eb0ebd16788f8277dd90f07c604ef56a98f44c4cd1da796",
+    "notes": "Cards photographed upside down, approximately 180 degrees."
+  },
+  {
+    "image": "captures/77fe8b5d904b55a45b117593eebc46a81c63e478646e42276a1ad071f73b778a.jpg",
+    "group": "capture",
+    "expected": [
+      "Trpasličí pěchota",
+      "Bojová vzducholoď",
+      "Princezna",
+      "Pán šelem",
+      "Zvonice",
+      "Elementál země",
+      "Kethský štít"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "77fe8b5d904b55a45b117593eebc46a81c63e478646e42276a1ad071f73b778a",
+    "originalCaptureId": "5d8be92cce52e055e0cef767cf4e93277f640a1cc29dc45268d7c1a96c9f1d2a"
+  },
+  {
+    "image": "captures/46062506684de909b1251a5ae7b49750c535fccf551fcf36945e55a44854e540.jpg",
+    "group": "capture",
+    "expected": [
+      "Přelud",
+      "Bažina",
+      "Jeskyně",
+      "Drak",
+      "Magická hůl",
+      "Nejvyšší mág",
+      "Blesk"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "46062506684de909b1251a5ae7b49750c535fccf551fcf36945e55a44854e540",
+    "originalCaptureId": "b72afa1f8dafc0c752ba4592a1d5cb608e18f6aef76c930ea257e9acd75b6aa1"
+  },
+  {
+    "image": "captures/d1eff92e0fbc8c961e2960d737ad63a51e8695b11ca8045568084ef722cbbc31.jpg",
+    "group": "capture",
+    "expected": [
+      "Fontána života",
+      "Bouře",
+      "Dvojník",
+      "Válečná loď",
+      "Ostrov",
+      "Nekromant",
+      "Stoletá voda",
+      "Bazilišek"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "d1eff92e0fbc8c961e2960d737ad63a51e8695b11ca8045568084ef722cbbc31",
+    "originalCaptureId": "e4b74b0535820c7383ff9bd02dc0b1214d51e5f6e3ec6c691fa387c840fcd3e1"
+  },
+  {
+    "image": "captures/67811bfd14a6dc86d70c1884cda4139b16d1d2bbf202eb3d030c894b8525d03f.jpg",
+    "group": "capture",
+    "expected": [
+      "Elementál země",
+      "Hora",
+      "Les",
+      "Stoletá voda",
+      "Magická hůl",
+      "Válečný oř",
+      "Pán šelem"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "67811bfd14a6dc86d70c1884cda4139b16d1d2bbf202eb3d030c894b8525d03f",
+    "originalCaptureId": "27d5d8aa3ca4dad7f17d195628639f11f929d4c54007d774f67ed264fe6c581b",
+    "notes": "Image originally triggered HTTP 500; seven complete readable title banners."
+  },
+  {
+    "image": "captures/e1f5b52cc229a9031057701ca0874064e9a3d0d74ae2eca0d1dfea012877fdbc.jpg",
+    "group": "capture",
+    "expected": [
+      "Elementál země",
+      "Hora",
+      "Les",
+      "Stoletá voda",
+      "Magická hůl",
+      "Válečný oř",
+      "Pán šelem"
+    ],
+    "labelSource": "Manual visual reading of title banners, 2026-10-29",
+    "sha256": "e1f5b52cc229a9031057701ca0874064e9a3d0d74ae2eca0d1dfea012877fdbc",
+    "originalCaptureId": "62b9abe9b3ab14c594c2f88c1dc1e7a96a7705050a578ca4f50abf57bdd9da04",
+    "notes": "Image originally triggered HTTP 500; seven complete readable title banners."
+  }
+]

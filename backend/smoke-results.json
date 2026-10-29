@@ -1,0 +1,372 @@
+{
+  "kind": "synthetic smoke; not real photograph acceptance",
+  "imageSize": [
+    1280,
+    720
+  ],
+  "jpegQuality": 80,
+  "payloadBytes": 24451,
+  "runs": [
+    {
+      "pass": 1,
+      "processingMs": 273,
+      "cards": [
+        {
+          "id": "FR32",
+          "name": "Královna",
+          "ocrText": "Kralovna",
+          "ocrConfidence": 0.9998,
+          "matchConfidence": 1.0,
+          "secondMatchConfidence": 0.6667,
+          "matchMargin": 0.3333,
+          "titleConfidence": 0.82,
+          "combinedConfidence": 0.9676,
+          "box": {
+            "x0": 0.11953125,
+            "y0": 0.16944444444444445,
+            "x1": 0.390625,
+            "y1": 0.3
+          },
+          "rotation": 0.0,
+          "accepted": true
+        }
+      ],
+      "candidates": [],
+      "debug": {
+        "rotations": [
+          0.0
+        ],
+        "rawTexts": [
+          {
+            "text": "Kralovna",
+            "ocrConfidence": 0.9998,
+            "titleConfidence": 0.82,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.11953125,
+              "y0": 0.16944444444444445,
+              "x1": 0.390625,
+              "y1": 0.3
+            }
+          },
+          {
+            "text": "Drak",
+            "ocrConfidence": 0.9999,
+            "titleConfidence": 0.0318,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.121875,
+              "y0": 0.7291666666666666,
+              "x1": 0.240625,
+              "y1": 0.8277777777777777
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pass": 2,
+      "processingMs": 164,
+      "cards": [
+        {
+          "id": "FR32",
+          "name": "Královna",
+          "ocrText": "Kralovna",
+          "ocrConfidence": 0.9998,
+          "matchConfidence": 1.0,
+          "secondMatchConfidence": 0.6667,
+          "matchMargin": 0.3333,
+          "titleConfidence": 0.82,
+          "combinedConfidence": 0.9676,
+          "box": {
+            "x0": 0.11953125,
+            "y0": 0.16944444444444445,
+            "x1": 0.390625,
+            "y1": 0.3
+          },
+          "rotation": 0.0,
+          "accepted": true
+        }
+      ],
+      "candidates": [],
+      "debug": {
+        "rotations": [
+          0.0
+        ],
+        "rawTexts": [
+          {
+            "text": "Kralovna",
+            "ocrConfidence": 0.9998,
+            "titleConfidence": 0.82,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.11953125,
+              "y0": 0.16944444444444445,
+              "x1": 0.390625,
+              "y1": 0.3
+            }
+          },
+          {
+            "text": "Drak",
+            "ocrConfidence": 0.9999,
+            "titleConfidence": 0.0318,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.121875,
+              "y0": 0.7291666666666666,
+              "x1": 0.240625,
+              "y1": 0.8277777777777777
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pass": 3,
+      "processingMs": 153,
+      "cards": [
+        {
+          "id": "FR32",
+          "name": "Královna",
+          "ocrText": "Kralovna",
+          "ocrConfidence": 0.9998,
+          "matchConfidence": 1.0,
+          "secondMatchConfidence": 0.6667,
+          "matchMargin": 0.3333,
+          "titleConfidence": 0.82,
+          "combinedConfidence": 0.9676,
+          "box": {
+            "x0": 0.11953125,
+            "y0": 0.16944444444444445,
+            "x1": 0.390625,
+            "y1": 0.3
+          },
+          "rotation": 0.0,
+          "accepted": true
+        }
+      ],
+      "candidates": [],
+      "debug": {
+        "rotations": [
+          0.0
+        ],
+        "rawTexts": [
+          {
+            "text": "Kralovna",
+            "ocrConfidence": 0.9998,
+            "titleConfidence": 0.82,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.11953125,
+              "y0": 0.16944444444444445,
+              "x1": 0.390625,
+              "y1": 0.3
+            }
+          },
+          {
+            "text": "Drak",
+            "ocrConfidence": 0.9999,
+            "titleConfidence": 0.0318,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.121875,
+              "y0": 0.7291666666666666,
+              "x1": 0.240625,
+              "y1": 0.8277777777777777
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "afterRestartRuns": [
+    {
+      "pass": 1,
+      "processingMs": 258,
+      "cards": [
+        {
+          "id": "FR32",
+          "name": "Královna",
+          "ocrText": "Kralovna",
+          "ocrConfidence": 0.9998,
+          "matchConfidence": 1.0,
+          "secondMatchConfidence": 0.6667,
+          "matchMargin": 0.3333,
+          "titleConfidence": 0.82,
+          "combinedConfidence": 0.9676,
+          "box": {
+            "x0": 0.11953125,
+            "y0": 0.16944444444444445,
+            "x1": 0.390625,
+            "y1": 0.3
+          },
+          "rotation": 0.0,
+          "accepted": true
+        }
+      ],
+      "candidates": [],
+      "debug": {
+        "rotations": [
+          0.0
+        ],
+        "rawTexts": [
+          {
+            "text": "Kralovna",
+            "ocrConfidence": 0.9998,
+            "titleConfidence": 0.82,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.11953125,
+              "y0": 0.16944444444444445,
+              "x1": 0.390625,
+              "y1": 0.3
+            }
+          },
+          {
+            "text": "Drak",
+            "ocrConfidence": 0.9999,
+            "titleConfidence": 0.0318,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.121875,
+              "y0": 0.7291666666666666,
+              "x1": 0.240625,
+              "y1": 0.8277777777777777
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pass": 2,
+      "processingMs": 164,
+      "cards": [
+        {
+          "id": "FR32",
+          "name": "Královna",
+          "ocrText": "Kralovna",
+          "ocrConfidence": 0.9998,
+          "matchConfidence": 1.0,
+          "secondMatchConfidence": 0.6667,
+          "matchMargin": 0.3333,
+          "titleConfidence": 0.82,
+          "combinedConfidence": 0.9676,
+          "box": {
+            "x0": 0.11953125,
+            "y0": 0.16944444444444445,
+            "x1": 0.390625,
+            "y1": 0.3
+          },
+          "rotation": 0.0,
+          "accepted": true
+        }
+      ],
+      "candidates": [],
+      "debug": {
+        "rotations": [
+          0.0
+        ],
+        "rawTexts": [
+          {
+            "text": "Kralovna",
+            "ocrConfidence": 0.9998,
+            "titleConfidence": 0.82,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.11953125,
+              "y0": 0.16944444444444445,
+              "x1": 0.390625,
+              "y1": 0.3
+            }
+          },
+          {
+            "text": "Drak",
+            "ocrConfidence": 0.9999,
+            "titleConfidence": 0.0318,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.121875,
+              "y0": 0.7291666666666666,
+              "x1": 0.240625,
+              "y1": 0.8277777777777777
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pass": 3,
+      "processingMs": 153,
+      "cards": [
+        {
+          "id": "FR32",
+          "name": "Královna",
+          "ocrText": "Kralovna",
+          "ocrConfidence": 0.9998,
+          "matchConfidence": 1.0,
+          "secondMatchConfidence": 0.6667,
+          "matchMargin": 0.3333,
+          "titleConfidence": 0.82,
+          "combinedConfidence": 0.9676,
+          "box": {
+            "x0": 0.11953125,
+            "y0": 0.16944444444444445,
+            "x1": 0.390625,
+            "y1": 0.3
+          },
+          "rotation": 0.0,
+          "accepted": true
+        }
+      ],
+      "candidates": [],
+      "debug": {
+        "rotations": [
+          0.0
+        ],
+        "rawTexts": [
+          {
+            "text": "Kralovna",
+            "ocrConfidence": 0.9998,
+            "titleConfidence": 0.82,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.11953125,
+              "y0": 0.16944444444444445,
+              "x1": 0.390625,
+              "y1": 0.3
+            }
+          },
+          {
+            "text": "Drak",
+            "ocrConfidence": 0.9999,
+            "titleConfidence": 0.0318,
+            "rotation": 0.0,
+            "box": {
+              "x0": 0.121875,
+              "y0": 0.7291666666666666,
+              "x1": 0.240625,
+              "y1": 0.8277777777777777
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "baseline": {
+    "detectionModel": "PP-OCRv5_server_det",
+    "rotations": [
+      0,
+      -22,
+      22
+    ],
+    "processingMs": [
+      9349,
+      9149,
+      9046
+    ],
+    "acceptedIds": [
+      "FR32"
+    ],
+    "rulesTextDrakRejected": true
+  }
+}

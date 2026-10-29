@@ -1,0 +1,39 @@
+name: validate
+
+on:
+  push:
+    branches:
+      - feature/self-hosted-ocr
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  static-and-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install lightweight test dependencies
+        run: python -m pip install -r backend/requirements-dev.txt
+
+      - name: Python matcher tests
+        run: PYTHONPATH=backend pytest backend/tests/test_matcher.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: JavaScript syntax
+        run: |
+          node --check js/scanner.js
+          node --check js/app.js
+          node --check js/config.js
+          node --check service-worker.js
+
+      - name: Docker Compose syntax
+        run: docker compose config

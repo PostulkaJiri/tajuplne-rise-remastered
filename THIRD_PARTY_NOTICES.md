@@ -6,27 +6,25 @@ Soubory `js/deck.js`, `js/hand.js` a `js/discard.js` vycházejí z open-source p
 
 https://github.com/fantasy-realms/fantasy-realms.github.io
 
-Původní projekt je distribuován pod MIT licencí. Její text:
+Původní projekt je distribuován pod MIT licencí. Původní copyright/licence musí
+zůstat zachována při redistribuci odvozeného kódu.
 
-MIT License
+## Architecture references
 
-Copyright (c) 2026 fantasy-realms
+Tyto projekty byly použity jako technická reference/inspirace, nikoli jako
+kopírovaný zdrojový kód v této větvi:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+- https://github.com/benjamin-klamerek/fantasy-realm-scoring (MIT)
+- https://github.com/JeremyMCastillo/pk-scan (MIT)
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+## Runtime libraries
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Self-hosted OCR backend používá mimo jiné:
 
+- PaddleOCR
+- PaddlePaddle
+- FastAPI
+- OpenCV
+- RapidFuzz
+
+Jejich licence se řídí příslušnými upstream projekty a distribuovanými balíčky.

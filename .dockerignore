@@ -1,0 +1,18 @@
+.git
+.gitignore
+.github
+**/__pycache__
+**/*.pyc
+backend/tests/fixtures/scans/**
+.env
+.pytest_cache
+backend/OCR_REPORT.md
+backend/fixture-results.json
+*.log
+
+testovaci-data/
+
+backend/local-ocr/
+
+# Private card originals and captured photographs
+data/
