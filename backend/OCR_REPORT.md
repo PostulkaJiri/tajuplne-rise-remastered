@@ -1,4 +1,8 @@
-# OCR report — 27. 10. 2026
+# OCR report — 27. 10. 2026 (historické měření)
+
+Aktuální opravu HTTP 500, konfiguraci a regresi nad rozšířenou sadou 37 snímků
+popisuje [OCR_CAPTURE_REPORT.md](OCR_CAPTURE_REPORT.md), měření z 29. 10. 2026.
+Níže zůstává původní měření a jeho tehdejší konfigurace.
 
 **Finální HTTP regrese: 124/124 správných detekcí, 0 false positives,
 0 false negatives.** Všech deset fotografií má 7/7; šest předloh má 9/9.

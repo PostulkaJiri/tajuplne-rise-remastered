@@ -119,7 +119,7 @@ minimální náskok před druhou shodou; samotný fragment jako „Elementál“
 Automatické přijetí dále vyžaduje OCR confidence a title-style threshold.
 
 Viz `.env.example`: čeština `cs`, `PP-OCRv5`, CPU, dva thready,
-`SCAN_ROTATIONS=0,-15`, matching 78 / high 92 / margin 7,
+`SCAN_ROTATIONS=0,-90`, matching 78 / high 92 / margin 7,
 `MIN_OCR_SCORE=0.32`, `MIN_TITLE_STYLE=0.30`. PaddleOCR 3.6.0 nepodporuje
 `PP-OCRv6`; používáme jeho podporovanou latin PP-OCRv5 konfiguraci.
 Explicitní modely jsou `PP-OCRv5_mobile_det` a `latin_PP-OCRv5_mobile_rec`.
@@ -129,15 +129,23 @@ výřezy v plném rozlišení; zjevné netitulkové oblasti se pomocí
 PaddleX 3.6.1. Sousední části stejného rozděleného titulku se spojují jen při
 shodné orientaci, blízké poloze a jednoznačné shodě celého spojeného názvu.
 
-Dva průchody 0/−15° byly zvoleny podle skutečných snímků: opravují natočený
-Elementál ohně a téměř svislý Sběratel. Frontend po měření používá nejvýše
+Dva průchody 0/−90° byly zvoleny podle rozšířené sady 37 snímků, včetně
+fotografií z aplikace natočených o 90° a vzhůru nohama. Frontend používá nejvýše
 1280 px a JPEG kvalitu 0.90. Testované menší JPEG kvality ztrácely některé
-čitelné titulky. Výsledky všech porovnání jsou v OCR reportu.
+čitelné titulky. Přečtený název musí mít alespoň 80 % délky předlohy; u názvů
+do čtyř písmen nesmí být kratší než předloha. Filtr titulku přizpůsobuje okolí orientaci textu,
+aby boční text pravidel nebyl zaměněn za titulek. Výsledky aktuálního měření jsou
+v [OCR_CAPTURE_REPORT.md](backend/OCR_CAPTURE_REPORT.md).
 
 API omezuje upload na 8 000 000 bytů i při streamování, dobu uploadu na 15 s
 a dekódování v tomto deploymentu na 25 milionů pixelů. OCR zpracovává jeden požadavek; další
 souběžné framy vracejí 429 místo vytváření fronty. Frontend také posílá snímky
 sekvenčně. API odpovědi se neukládají do PWA cache.
+
+Model se inicializuje a všechny skeny provádí jedno stálé pracovní vlákno.
+Přenos stejného Paddle/oneDNN prediktoru mezi dočasnými AnyIO vlákny vyvolával
+po nečinnosti občasné `RuntimeError: std::exception` / HTTP 500. Při zrušení
+requestu zůstává skener obsazený, dokud skutečná inference neskončí; nevzniká fronta.
 
 ## Soukromí a testování
 
@@ -171,6 +179,16 @@ Gitem i Docker buildem. Bind mounty vedou výhradně do tohoto workspace.
 Nový ground truth byl ručně přečten přímo z 16 dodaných snímků: deset
 fotografií se 70 čitelnými názvy a šest předloh se všemi 54 kartami.
 Obsahuje SHA-256 každého souboru; staré IMG názvy se nepoužívají.
+
+Dne 29. 10. 2026 bylo přidáno 21 fotografií z archivu aplikace se 151 ručně
+přečtenými tituly (`group=capture`). OCR predikce se nepoužily jako referenční
+popisky. Přesná kopie známého původního testu se z nové sady vynechala.
+Část fotografií zachycuje stejnou sestavu opakovaně; nejde o 21 nezávislých scén.
+
+```bash
+python3 backend/scripts/import_captured_fixtures.py
+python3 backend/scripts/evaluate_fixtures.py --group capture
+```
 
 Dodané regresní fotografie se pro opakovatelné testy kopírují do
 `backend/tests/fixtures/scans/`; nové záběry aplikace ukládá do `data/captures/`.

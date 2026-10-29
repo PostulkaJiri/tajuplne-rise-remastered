@@ -1,0 +1,1533 @@
+{
+  "measuredAt": "2026-10-29",
+  "groundTruthMethod": "Independent manual visual reading of all 37 labelled images, including 21 private captured photographs. OCR JSON was not used as ground truth.",
+  "scope": "Sequential local HTTP API regression, accepted cards only. Several photographs repeat the same arrangement; this is not an independent holdout or a physical live-camera test.",
+  "configuration": {
+    "detectionModel": "PP-OCRv5_mobile_det",
+    "recognitionModel": "latin_PP-OCRv5_mobile_rec",
+    "detectorMaxSide": 960,
+    "detectorLimitType": "max",
+    "detectorBoxThreshold": 0.5,
+    "rotations": [
+      0,
+      -90
+    ],
+    "minimumTitleCoverage": 0.8,
+    "shortTitleMinimumLetters": 4,
+    "titlePrefilter": true,
+    "ocrExecution": "One persistent thread owns predictor initialization, inference and disposal."
+  },
+  "baseline": {
+    "configuration": {
+      "rotations": [
+        0,
+        -15
+      ],
+      "matching": "Before clipped-title rejection",
+      "titlePadding": "Before orientation correction",
+      "ocrExecution": "Already fixed persistent thread; HTTP-500 runs are not counted as accuracy measurements."
+    },
+    "summary": {
+      "imagesTested": 37,
+      "imagesFailed": 0,
+      "expectedCards": 275,
+      "correctDetections": 258,
+      "falseNegatives": 17,
+      "falsePositives": 2,
+      "recall": 0.9381818181818182,
+      "precision": 0.9923076923076923,
+      "averageProcessingMs": 804.972972972973,
+      "p95ProcessingMs": 1289.0
+    },
+    "groups": {
+      "capture": {
+        "imagesTested": 21,
+        "imagesFailed": 0,
+        "expectedCards": 151,
+        "correctDetections": 134,
+        "falseNegatives": 17,
+        "falsePositives": 2,
+        "recall": 0.8874172185430463,
+        "precision": 0.9852941176470589,
+        "averageProcessingMs": 720.6190476190476,
+        "p95ProcessingMs": 996.0
+      },
+      "original": {
+        "imagesTested": 6,
+        "imagesFailed": 0,
+        "expectedCards": 54,
+        "correctDetections": 54,
+        "falseNegatives": 0,
+        "falsePositives": 0,
+        "recall": 1.0,
+        "precision": 1.0,
+        "averageProcessingMs": 1171.0,
+        "p95ProcessingMs": 1289.0
+      },
+      "photo": {
+        "imagesTested": 10,
+        "imagesFailed": 0,
+        "expectedCards": 70,
+        "correctDetections": 70,
+        "falseNegatives": 0,
+        "falsePositives": 0,
+        "recall": 1.0,
+        "precision": 1.0,
+        "averageProcessingMs": 762.5,
+        "p95ProcessingMs": 1088.0
+      }
+    }
+  },
+  "summary": {
+    "imagesTested": 37,
+    "imagesFailed": 0,
+    "expectedCards": 275,
+    "correctDetections": 274,
+    "falseNegatives": 1,
+    "falsePositives": 0,
+    "recall": 0.9963636363636363,
+    "precision": 1.0,
+    "averageProcessingMs": 728.6216216216217,
+    "p95ProcessingMs": 1213.0
+  },
+  "groups": {
+    "capture": {
+      "imagesTested": 21,
+      "imagesFailed": 0,
+      "expectedCards": 151,
+      "correctDetections": 150,
+      "falseNegatives": 1,
+      "falsePositives": 0,
+      "recall": 0.9933774834437086,
+      "precision": 1.0,
+      "averageProcessingMs": 613.0,
+      "p95ProcessingMs": 1107.0
+    },
+    "original": {
+      "imagesTested": 6,
+      "imagesFailed": 0,
+      "expectedCards": 54,
+      "correctDetections": 54,
+      "falseNegatives": 0,
+      "falsePositives": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "averageProcessingMs": 1078.8333333333333,
+      "p95ProcessingMs": 1303.0
+    },
+    "photo": {
+      "imagesTested": 10,
+      "imagesFailed": 0,
+      "expectedCards": 70,
+      "correctDetections": 70,
+      "falseNegatives": 0,
+      "falsePositives": 0,
+      "recall": 1.0,
+      "precision": 1.0,
+      "averageProcessingMs": 761.3,
+      "p95ProcessingMs": 1193.0
+    }
+  },
+  "results": [
+    {
+      "image": "foto/ChatGPT Image Oct 27, 2026, 07_21_40 PM.jpg",
+      "group": "photo",
+      "expected": [
+        "Dvojník",
+        "Elementál vzduchu",
+        "Kniha proměn",
+        "Kovárna",
+        "Královna",
+        "Ochranná runa",
+        "Strom světa"
+      ],
+      "detected": [
+        "Dvojník",
+        "Elementál vzduchu",
+        "Kniha proměn",
+        "Kovárna",
+        "Královna",
+        "Ochranná runa",
+        "Strom světa"
+      ],
+      "correct": [
+        "Dvojník",
+        "Elementál vzduchu",
+        "Kniha proměn",
+        "Kovárna",
+        "Královna",
+        "Ochranná runa",
+        "Strom světa"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 772.0,
+      "roundTripMs": 800.1
+    },
+    {
+      "image": "foto/ChatGPT Image Oct 27, 2026, 07_21_48 PM.jpg",
+      "group": "photo",
+      "expected": [
+        "Bojová vzducholoď",
+        "Elementál vody",
+        "Elfský luk",
+        "Kouř",
+        "Nekromant",
+        "Tornádo",
+        "Těžká jízda"
+      ],
+      "detected": [
+        "Bojová vzducholoď",
+        "Elementál vody",
+        "Elfský luk",
+        "Kouř",
+        "Nekromant",
+        "Tornádo",
+        "Těžká jízda"
+      ],
+      "correct": [
+        "Bojová vzducholoď",
+        "Elementál vody",
+        "Elfský luk",
+        "Kouř",
+        "Nekromant",
+        "Tornádo",
+        "Těžká jízda"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 848.0,
+      "roundTripMs": 862.7
+    },
+    {
+      "image": "foto/ChatGPT Image Oct 27, 2026, 07_21_55 PM.jpg",
+      "group": "photo",
+      "expected": [
+        "Bojová vzducholoď",
+        "Elementál vody",
+        "Elfský luk",
+        "Kouř",
+        "Nekromant",
+        "Tornádo",
+        "Těžká jízda"
+      ],
+      "detected": [
+        "Bojová vzducholoď",
+        "Elementál vody",
+        "Elfský luk",
+        "Kouř",
+        "Nekromant",
+        "Tornádo",
+        "Těžká jízda"
+      ],
+      "correct": [
+        "Bojová vzducholoď",
+        "Elementál vody",
+        "Elfský luk",
+        "Kouř",
+        "Nekromant",
+        "Tornádo",
+        "Těžká jízda"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 786.0,
+      "roundTripMs": 797.5
+    },
+    {
+      "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_03 PM.jpg",
+      "group": "photo",
+      "expected": [
+        "Bouře",
+        "Drak",
+        "Elementál ohně",
+        "Jednorožec",
+        "Kethský štít",
+        "Nejvyšší mág",
+        "Zvonice"
+      ],
+      "detected": [
+        "Bouře",
+        "Drak",
+        "Elementál ohně",
+        "Jednorožec",
+        "Kethský štít",
+        "Nejvyšší mág",
+        "Zvonice"
+      ],
+      "correct": [
+        "Bouře",
+        "Drak",
+        "Elementál ohně",
+        "Jednorožec",
+        "Kethský štít",
+        "Nejvyšší mág",
+        "Zvonice"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 1008.0,
+      "roundTripMs": 1019.8
+    },
+    {
+      "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_10 PM.jpg",
+      "group": "photo",
+      "expected": [
+        "Kethský meč",
+        "Les",
+        "Magická hůl",
+        "Požár",
+        "Pán šelem",
+        "Válečná loď",
+        "Šašek"
+      ],
+      "detected": [
+        "Kethský meč",
+        "Les",
+        "Magická hůl",
+        "Požár",
+        "Pán šelem",
+        "Válečná loď",
+        "Šašek"
+      ],
+      "correct": [
+        "Kethský meč",
+        "Les",
+        "Magická hůl",
+        "Požár",
+        "Pán šelem",
+        "Válečná loď",
+        "Šašek"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 1193.0,
+      "roundTripMs": 1205.7
+    },
+    {
+      "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_19 PM.jpg",
+      "group": "photo",
+      "expected": [
+        "Blesk",
+        "Elementál země",
+        "Hora",
+        "Hydra",
+        "Ostrov",
+        "Svíčka",
+        "Velitel"
+      ],
+      "detected": [
+        "Blesk",
+        "Elementál země",
+        "Hora",
+        "Hydra",
+        "Ostrov",
+        "Svíčka",
+        "Velitel"
+      ],
+      "correct": [
+        "Blesk",
+        "Elementál země",
+        "Hora",
+        "Hydra",
+        "Ostrov",
+        "Svíčka",
+        "Velitel"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 817.0,
+      "roundTripMs": 828.3
+    },
+    {
+      "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_27 PM.jpg",
+      "group": "photo",
+      "expected": [
+        "Bažina",
+        "Elfí lučištníci",
+        "Fontána života",
+        "Král",
+        "Rytířky",
+        "Sběratel",
+        "Stoletá voda"
+      ],
+      "detected": [
+        "Bažina",
+        "Elfí lučištníci",
+        "Fontána života",
+        "Král",
+        "Rytířky",
+        "Sběratel",
+        "Stoletá voda"
+      ],
+      "correct": [
+        "Bažina",
+        "Elfí lučištníci",
+        "Fontána života",
+        "Král",
+        "Rytířky",
+        "Sběratel",
+        "Stoletá voda"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 498.0,
+      "roundTripMs": 509.6
+    },
+    {
+      "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_35 PM.jpg",
+      "group": "photo",
+      "expected": [
+        "Císařovna",
+        "Hraničáři",
+        "Jeskyně",
+        "Kouzelnice",
+        "Princezna",
+        "Přelud",
+        "Válečný oř"
+      ],
+      "detected": [
+        "Císařovna",
+        "Hraničáři",
+        "Jeskyně",
+        "Kouzelnice",
+        "Princezna",
+        "Přelud",
+        "Válečný oř"
+      ],
+      "correct": [
+        "Císařovna",
+        "Hraničáři",
+        "Jeskyně",
+        "Kouzelnice",
+        "Princezna",
+        "Přelud",
+        "Válečný oř"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 517.0,
+      "roundTripMs": 529.1
+    },
+    {
+      "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_42 PM.jpg",
+      "group": "photo",
+      "expected": [
+        "Bazilišek",
+        "Dvojník",
+        "Elementál vzduchu",
+        "Ochranná runa",
+        "Sněhová vánice",
+        "Strom světa",
+        "Trpasličí pěchota"
+      ],
+      "detected": [
+        "Bazilišek",
+        "Dvojník",
+        "Elementál vzduchu",
+        "Ochranná runa",
+        "Sněhová vánice",
+        "Strom světa",
+        "Trpasličí pěchota"
+      ],
+      "correct": [
+        "Bazilišek",
+        "Dvojník",
+        "Elementál vzduchu",
+        "Ochranná runa",
+        "Sněhová vánice",
+        "Strom světa",
+        "Trpasličí pěchota"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 553.0,
+      "roundTripMs": 568.5
+    },
+    {
+      "image": "foto/ChatGPT Image Oct 27, 2026, 07_22_49 PM.jpg",
+      "group": "photo",
+      "expected": [
+        "Bazilišek",
+        "Bažina",
+        "Elfí lučištníci",
+        "Rytířky",
+        "Sběratel",
+        "Sněhová vánice",
+        "Trpasličí pěchota"
+      ],
+      "detected": [
+        "Bazilišek",
+        "Bažina",
+        "Elfí lučištníci",
+        "Rytířky",
+        "Sběratel",
+        "Sněhová vánice",
+        "Trpasličí pěchota"
+      ],
+      "correct": [
+        "Bazilišek",
+        "Bažina",
+        "Elfí lučištníci",
+        "Rytířky",
+        "Sběratel",
+        "Sněhová vánice",
+        "Trpasličí pěchota"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 621.0,
+      "roundTripMs": 635.4
+    },
+    {
+      "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_37 PM-1.png",
+      "group": "original",
+      "expected": [
+        "Bazilišek",
+        "Císařovna",
+        "Elementál vody",
+        "Elfí lučištníci",
+        "Krystal řádu",
+        "Magická hůl",
+        "Nejvyšší mág",
+        "Sněhová vánice",
+        "Velitel"
+      ],
+      "detected": [
+        "Bazilišek",
+        "Císařovna",
+        "Elementál vody",
+        "Elfí lučištníci",
+        "Krystal řádu",
+        "Magická hůl",
+        "Nejvyšší mág",
+        "Sněhová vánice",
+        "Velitel"
+      ],
+      "correct": [
+        "Bazilišek",
+        "Císařovna",
+        "Elementál vody",
+        "Elfí lučištníci",
+        "Krystal řádu",
+        "Magická hůl",
+        "Nejvyšší mág",
+        "Sněhová vánice",
+        "Velitel"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 990.0,
+      "roundTripMs": 1031.9
+    },
+    {
+      "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_38 PM-2.png",
+      "group": "original",
+      "expected": [
+        "Elementál ohně",
+        "Hydra",
+        "Jeskyně",
+        "Kouř",
+        "Rytířky",
+        "Strom světa",
+        "Svíčka",
+        "Trpasličí pěchota",
+        "Šašek"
+      ],
+      "detected": [
+        "Elementál ohně",
+        "Hydra",
+        "Jeskyně",
+        "Kouř",
+        "Rytířky",
+        "Strom světa",
+        "Svíčka",
+        "Trpasličí pěchota",
+        "Šašek"
+      ],
+      "correct": [
+        "Elementál ohně",
+        "Hydra",
+        "Jeskyně",
+        "Kouř",
+        "Rytířky",
+        "Strom světa",
+        "Svíčka",
+        "Trpasličí pěchota",
+        "Šašek"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 854.0,
+      "roundTripMs": 894.0
+    },
+    {
+      "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_39 PM-3.png",
+      "group": "original",
+      "expected": [
+        "Drak",
+        "Elementál vzduchu",
+        "Fontána života",
+        "Jednorožec",
+        "Kovárna",
+        "Ostrov",
+        "Pán šelem",
+        "Přelud",
+        "Tornádo"
+      ],
+      "detected": [
+        "Drak",
+        "Elementál vzduchu",
+        "Fontána života",
+        "Jednorožec",
+        "Kovárna",
+        "Ostrov",
+        "Pán šelem",
+        "Přelud",
+        "Tornádo"
+      ],
+      "correct": [
+        "Drak",
+        "Elementál vzduchu",
+        "Fontána života",
+        "Jednorožec",
+        "Kovárna",
+        "Ostrov",
+        "Pán šelem",
+        "Přelud",
+        "Tornádo"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 1012.0,
+      "roundTripMs": 1051.6
+    },
+    {
+      "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_40 PM-4.png",
+      "group": "original",
+      "expected": [
+        "Dvojník",
+        "Elementál země",
+        "Hora",
+        "Kouzelnice",
+        "Nekromant",
+        "Ochranná runa",
+        "Sběratel",
+        "Válečná loď",
+        "Zvonice"
+      ],
+      "detected": [
+        "Dvojník",
+        "Elementál země",
+        "Hora",
+        "Kouzelnice",
+        "Nekromant",
+        "Ochranná runa",
+        "Sběratel",
+        "Válečná loď",
+        "Zvonice"
+      ],
+      "correct": [
+        "Dvojník",
+        "Elementál země",
+        "Hora",
+        "Kouzelnice",
+        "Nekromant",
+        "Ochranná runa",
+        "Sběratel",
+        "Válečná loď",
+        "Zvonice"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 1101.0,
+      "roundTripMs": 1140.8
+    },
+    {
+      "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_40 PM-5.png",
+      "group": "original",
+      "expected": [
+        "Bažina",
+        "Blesk",
+        "Bojová vzducholoď",
+        "Kethský štít",
+        "Královna",
+        "Les",
+        "Měňavec",
+        "Princezna",
+        "Stoletá voda"
+      ],
+      "detected": [
+        "Bažina",
+        "Blesk",
+        "Bojová vzducholoď",
+        "Kethský štít",
+        "Královna",
+        "Les",
+        "Měňavec",
+        "Princezna",
+        "Stoletá voda"
+      ],
+      "correct": [
+        "Bažina",
+        "Blesk",
+        "Bojová vzducholoď",
+        "Kethský štít",
+        "Královna",
+        "Les",
+        "Měňavec",
+        "Princezna",
+        "Stoletá voda"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 1213.0,
+      "roundTripMs": 1251.0
+    },
+    {
+      "image": "originaly/ChatGPT Image Oct 26, 2026, 07_56_41 PM-6.png",
+      "group": "original",
+      "expected": [
+        "Bouře",
+        "Elfský luk",
+        "Hraničáři",
+        "Kethský meč",
+        "Kniha proměn",
+        "Král",
+        "Požár",
+        "Těžká jízda",
+        "Válečný oř"
+      ],
+      "detected": [
+        "Bouře",
+        "Elfský luk",
+        "Hraničáři",
+        "Kethský meč",
+        "Kniha proměn",
+        "Král",
+        "Požár",
+        "Těžká jízda",
+        "Válečný oř"
+      ],
+      "correct": [
+        "Bouře",
+        "Elfský luk",
+        "Hraničáři",
+        "Kethský meč",
+        "Kniha proměn",
+        "Král",
+        "Požár",
+        "Těžká jízda",
+        "Válečný oř"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 1303.0,
+      "roundTripMs": 1341.6
+    },
+    {
+      "image": "captures/3d1681d5fad29f127cdc5197ba2c4db236d65e974b05b6ce8a80e9e25324a669.jpg",
+      "group": "capture",
+      "expected": [
+        "Bojová vzducholoď",
+        "Elementál vody",
+        "Elfský luk",
+        "Kouř",
+        "Nejvyšší mág",
+        "Nekromant",
+        "Tornádo",
+        "Těžká jízda"
+      ],
+      "detected": [
+        "Bojová vzducholoď",
+        "Elementál vody",
+        "Elfský luk",
+        "Kouř",
+        "Nejvyšší mág",
+        "Nekromant",
+        "Tornádo",
+        "Těžká jízda"
+      ],
+      "correct": [
+        "Bojová vzducholoď",
+        "Elementál vody",
+        "Elfský luk",
+        "Kouř",
+        "Nejvyšší mág",
+        "Nekromant",
+        "Tornádo",
+        "Těžká jízda"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 1107.0,
+      "roundTripMs": 1116.4
+    },
+    {
+      "image": "captures/80e70d6644737eeaff922de30cfb37be649e8a55f68bc6efbca90d6c32d49f82.jpg",
+      "group": "capture",
+      "expected": [
+        "Drak",
+        "Elementál ohně",
+        "Elfí lučištníci",
+        "Jednorožec",
+        "Rytířky",
+        "Sběratel",
+        "Zvonice"
+      ],
+      "detected": [
+        "Drak",
+        "Elementál ohně",
+        "Elfí lučištníci",
+        "Jednorožec",
+        "Rytířky",
+        "Sběratel",
+        "Zvonice"
+      ],
+      "correct": [
+        "Drak",
+        "Elementál ohně",
+        "Elfí lučištníci",
+        "Jednorožec",
+        "Rytířky",
+        "Sběratel",
+        "Zvonice"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 566.0,
+      "roundTripMs": 575.9
+    },
+    {
+      "image": "captures/2d241e7e4c854929aed28773e0590725073a09d16fd4afc5060a78f5548d1066.jpg",
+      "group": "capture",
+      "expected": [
+        "Drak",
+        "Elementál ohně",
+        "Elfí lučištníci",
+        "Jednorožec",
+        "Rytířky",
+        "Sběratel",
+        "Zvonice"
+      ],
+      "detected": [
+        "Drak",
+        "Elementál ohně",
+        "Elfí lučištníci",
+        "Jednorožec",
+        "Rytířky",
+        "Sběratel",
+        "Zvonice"
+      ],
+      "correct": [
+        "Drak",
+        "Elementál ohně",
+        "Elfí lučištníci",
+        "Jednorožec",
+        "Rytířky",
+        "Sběratel",
+        "Zvonice"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 562.0,
+      "roundTripMs": 571.0
+    },
+    {
+      "image": "captures/4c9accf10c0874595391091a9f77904d9de43b2a43da4c6654d402ab4cad5ee5.jpg",
+      "group": "capture",
+      "expected": [
+        "Bouře",
+        "Kethský meč",
+        "Kethský štít",
+        "Les",
+        "Požár",
+        "Pán šelem",
+        "Válečná loď"
+      ],
+      "detected": [
+        "Bouře",
+        "Kethský meč",
+        "Kethský štít",
+        "Les",
+        "Požár",
+        "Pán šelem",
+        "Válečná loď"
+      ],
+      "correct": [
+        "Bouře",
+        "Kethský meč",
+        "Kethský štít",
+        "Les",
+        "Požár",
+        "Pán šelem",
+        "Válečná loď"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 937.0,
+      "roundTripMs": 945.6
+    },
+    {
+      "image": "captures/455ae0ec836f0b4282796c8e0204d16338a82f7e771422578164745421f55055.jpg",
+      "group": "capture",
+      "expected": [
+        "Bouře",
+        "Kethský meč",
+        "Kethský štít",
+        "Les",
+        "Požár",
+        "Pán šelem",
+        "Válečná loď"
+      ],
+      "detected": [
+        "Bouře",
+        "Kethský meč",
+        "Kethský štít",
+        "Les",
+        "Požár",
+        "Pán šelem",
+        "Válečná loď"
+      ],
+      "correct": [
+        "Bouře",
+        "Kethský meč",
+        "Kethský štít",
+        "Les",
+        "Požár",
+        "Pán šelem",
+        "Válečná loď"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 984.0,
+      "roundTripMs": 992.6
+    },
+    {
+      "image": "captures/167cb57418070fe8eebf50930793793cc4abc0ea62ed57596fc77c2488e46b9b.jpg",
+      "group": "capture",
+      "expected": [
+        "Blesk",
+        "Hydra",
+        "Nejvyšší mág",
+        "Ostrov",
+        "Stoletá voda",
+        "Válečný oř",
+        "Zvonice"
+      ],
+      "detected": [
+        "Blesk",
+        "Hydra",
+        "Nejvyšší mág",
+        "Ostrov",
+        "Stoletá voda",
+        "Válečný oř",
+        "Zvonice"
+      ],
+      "correct": [
+        "Blesk",
+        "Hydra",
+        "Nejvyšší mág",
+        "Ostrov",
+        "Stoletá voda",
+        "Válečný oř",
+        "Zvonice"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 439.0,
+      "roundTripMs": 446.8
+    },
+    {
+      "image": "captures/2f7ba8038840b83b92821239fa5fcdd4e0425af16728054d23fa2e3d22d767d0.jpg",
+      "group": "capture",
+      "expected": [
+        "Elementál země",
+        "Fontána života",
+        "Hora",
+        "Jednorožec",
+        "Kouzelnice",
+        "Magická hůl",
+        "Princezna"
+      ],
+      "detected": [
+        "Elementál země",
+        "Fontána života",
+        "Hora",
+        "Jednorožec",
+        "Kouzelnice",
+        "Magická hůl",
+        "Princezna"
+      ],
+      "correct": [
+        "Elementál země",
+        "Fontána života",
+        "Hora",
+        "Jednorožec",
+        "Kouzelnice",
+        "Magická hůl",
+        "Princezna"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 559.0,
+      "roundTripMs": 569.0
+    },
+    {
+      "image": "captures/690bd7bb5c32d8ca97f989ef7f5bb19b8aa85a1a44b0d2c2f0e764012ae8a7ae.jpg",
+      "group": "capture",
+      "expected": [
+        "Elementál země",
+        "Fontána života",
+        "Hora",
+        "Jednorožec",
+        "Kouzelnice",
+        "Magická hůl",
+        "Princezna"
+      ],
+      "detected": [
+        "Elementál země",
+        "Fontána života",
+        "Hora",
+        "Jednorožec",
+        "Kouzelnice",
+        "Magická hůl",
+        "Princezna"
+      ],
+      "correct": [
+        "Elementál země",
+        "Fontána života",
+        "Hora",
+        "Jednorožec",
+        "Kouzelnice",
+        "Magická hůl",
+        "Princezna"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 417.0,
+      "roundTripMs": 430.5
+    },
+    {
+      "image": "captures/f8bfad129cf4b55cdcf022c79c2989d34bbb9e7d418d40bbe7152e837b4ff0eb.jpg",
+      "group": "capture",
+      "expected": [
+        "Elfský luk",
+        "Hydra",
+        "Kouzelnice",
+        "Les",
+        "Měňavec",
+        "Tornádo",
+        "Válečný oř"
+      ],
+      "detected": [
+        "Elfský luk",
+        "Hydra",
+        "Kouzelnice",
+        "Les",
+        "Měňavec",
+        "Tornádo",
+        "Válečný oř"
+      ],
+      "correct": [
+        "Elfský luk",
+        "Hydra",
+        "Kouzelnice",
+        "Les",
+        "Měňavec",
+        "Tornádo",
+        "Válečný oř"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 686.0,
+      "roundTripMs": 697.0
+    },
+    {
+      "image": "captures/7ec548aabf15613ce1cf8e701179a0d4dfa49c0682e1d5a38deb05f42f305cf7.jpg",
+      "group": "capture",
+      "expected": [
+        "Elfský luk",
+        "Hydra",
+        "Kouzelnice",
+        "Les",
+        "Měňavec",
+        "Tornádo",
+        "Válečný oř"
+      ],
+      "detected": [
+        "Elfský luk",
+        "Hydra",
+        "Kouzelnice",
+        "Měňavec",
+        "Tornádo",
+        "Válečný oř"
+      ],
+      "correct": [
+        "Elfský luk",
+        "Hydra",
+        "Kouzelnice",
+        "Měňavec",
+        "Tornádo",
+        "Válečný oř"
+      ],
+      "falseNegatives": [
+        "Les"
+      ],
+      "falsePositives": [],
+      "processingMs": 525.0,
+      "roundTripMs": 539.1
+    },
+    {
+      "image": "captures/dae9f1cd274a47bd56d9669617f5c9abc5cf77472c9f4805a817034c97304db5.jpg",
+      "group": "capture",
+      "expected": [
+        "Elfský luk",
+        "Hydra",
+        "Kouzelnice",
+        "Les",
+        "Měňavec",
+        "Tornádo",
+        "Válečný oř"
+      ],
+      "detected": [
+        "Elfský luk",
+        "Hydra",
+        "Kouzelnice",
+        "Les",
+        "Měňavec",
+        "Tornádo",
+        "Válečný oř"
+      ],
+      "correct": [
+        "Elfský luk",
+        "Hydra",
+        "Kouzelnice",
+        "Les",
+        "Měňavec",
+        "Tornádo",
+        "Válečný oř"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 441.0,
+      "roundTripMs": 450.4
+    },
+    {
+      "image": "captures/dc6047becbbb8bb7c29eba6f0c7a33f17528c5c606c6edf55c5ab29d68e66a11.jpg",
+      "group": "capture",
+      "expected": [
+        "Blesk",
+        "Bouře",
+        "Kouř",
+        "Král",
+        "Nekromant",
+        "Rytířky",
+        "Sběratel",
+        "Těžká jízda"
+      ],
+      "detected": [
+        "Blesk",
+        "Bouře",
+        "Kouř",
+        "Král",
+        "Nekromant",
+        "Rytířky",
+        "Sběratel",
+        "Těžká jízda"
+      ],
+      "correct": [
+        "Blesk",
+        "Bouře",
+        "Kouř",
+        "Král",
+        "Nekromant",
+        "Rytířky",
+        "Sběratel",
+        "Těžká jízda"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 1116.0,
+      "roundTripMs": 1126.1
+    },
+    {
+      "image": "captures/3d81537f0aad6c79270ab0b40bf0a5558e326331f4fc326338a325420c60d19b.jpg",
+      "group": "capture",
+      "expected": [
+        "Bojová vzducholoď",
+        "Císařovna",
+        "Magická hůl",
+        "Nekromant",
+        "Ochranná runa",
+        "Sběratel",
+        "Těžká jízda",
+        "Šašek"
+      ],
+      "detected": [
+        "Bojová vzducholoď",
+        "Císařovna",
+        "Magická hůl",
+        "Nekromant",
+        "Ochranná runa",
+        "Sběratel",
+        "Těžká jízda",
+        "Šašek"
+      ],
+      "correct": [
+        "Bojová vzducholoď",
+        "Císařovna",
+        "Magická hůl",
+        "Nekromant",
+        "Ochranná runa",
+        "Sběratel",
+        "Těžká jízda",
+        "Šašek"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 559.0,
+      "roundTripMs": 567.2
+    },
+    {
+      "image": "captures/02e62b10f9bf45ab739ffa6a3339d452a7178b35665b2bda17a5931c918c4e2d.jpg",
+      "group": "capture",
+      "expected": [
+        "Blesk",
+        "Bouře",
+        "Elementál vody",
+        "Kouř",
+        "Nejvyšší mág",
+        "Stoletá voda",
+        "Tornádo"
+      ],
+      "detected": [
+        "Blesk",
+        "Bouře",
+        "Elementál vody",
+        "Kouř",
+        "Nejvyšší mág",
+        "Stoletá voda",
+        "Tornádo"
+      ],
+      "correct": [
+        "Blesk",
+        "Bouře",
+        "Elementál vody",
+        "Kouř",
+        "Nejvyšší mág",
+        "Stoletá voda",
+        "Tornádo"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 503.0,
+      "roundTripMs": 511.5
+    },
+    {
+      "image": "captures/93f9e1153d7763454d33aeb17a3626c0ecf27593646f490d032962c68863705d.jpg",
+      "group": "capture",
+      "expected": [
+        "Císařovna",
+        "Fontána života",
+        "Jednorožec",
+        "Kethský meč",
+        "Kovárna",
+        "Sněhová vánice",
+        "Strom světa"
+      ],
+      "detected": [
+        "Císařovna",
+        "Fontána života",
+        "Jednorožec",
+        "Kethský meč",
+        "Kovárna",
+        "Sněhová vánice",
+        "Strom světa"
+      ],
+      "correct": [
+        "Císařovna",
+        "Fontána života",
+        "Jednorožec",
+        "Kethský meč",
+        "Kovárna",
+        "Sněhová vánice",
+        "Strom světa"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 448.0,
+      "roundTripMs": 456.7
+    },
+    {
+      "image": "captures/214aa1259fb1a33b580e0da844c93cba8f7e4c5476735fdcc1143e8e186769e2.jpg",
+      "group": "capture",
+      "expected": [
+        "Bojová vzducholoď",
+        "Elementál země",
+        "Kethský štít",
+        "Princezna",
+        "Pán šelem",
+        "Trpasličí pěchota",
+        "Zvonice"
+      ],
+      "detected": [
+        "Bojová vzducholoď",
+        "Elementál země",
+        "Kethský štít",
+        "Princezna",
+        "Pán šelem",
+        "Trpasličí pěchota",
+        "Zvonice"
+      ],
+      "correct": [
+        "Bojová vzducholoď",
+        "Elementál země",
+        "Kethský štít",
+        "Princezna",
+        "Pán šelem",
+        "Trpasličí pěchota",
+        "Zvonice"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 412.0,
+      "roundTripMs": 421.3
+    },
+    {
+      "image": "captures/77fe8b5d904b55a45b117593eebc46a81c63e478646e42276a1ad071f73b778a.jpg",
+      "group": "capture",
+      "expected": [
+        "Bojová vzducholoď",
+        "Elementál země",
+        "Kethský štít",
+        "Princezna",
+        "Pán šelem",
+        "Trpasličí pěchota",
+        "Zvonice"
+      ],
+      "detected": [
+        "Bojová vzducholoď",
+        "Elementál země",
+        "Kethský štít",
+        "Princezna",
+        "Pán šelem",
+        "Trpasličí pěchota",
+        "Zvonice"
+      ],
+      "correct": [
+        "Bojová vzducholoď",
+        "Elementál země",
+        "Kethský štít",
+        "Princezna",
+        "Pán šelem",
+        "Trpasličí pěchota",
+        "Zvonice"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 509.0,
+      "roundTripMs": 517.8
+    },
+    {
+      "image": "captures/46062506684de909b1251a5ae7b49750c535fccf551fcf36945e55a44854e540.jpg",
+      "group": "capture",
+      "expected": [
+        "Bažina",
+        "Blesk",
+        "Drak",
+        "Jeskyně",
+        "Magická hůl",
+        "Nejvyšší mág",
+        "Přelud"
+      ],
+      "detected": [
+        "Bažina",
+        "Blesk",
+        "Drak",
+        "Jeskyně",
+        "Magická hůl",
+        "Nejvyšší mág",
+        "Přelud"
+      ],
+      "correct": [
+        "Bažina",
+        "Blesk",
+        "Drak",
+        "Jeskyně",
+        "Magická hůl",
+        "Nejvyšší mág",
+        "Přelud"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 605.0,
+      "roundTripMs": 615.4
+    },
+    {
+      "image": "captures/d1eff92e0fbc8c961e2960d737ad63a51e8695b11ca8045568084ef722cbbc31.jpg",
+      "group": "capture",
+      "expected": [
+        "Bazilišek",
+        "Bouře",
+        "Dvojník",
+        "Fontána života",
+        "Nekromant",
+        "Ostrov",
+        "Stoletá voda",
+        "Válečná loď"
+      ],
+      "detected": [
+        "Bazilišek",
+        "Bouře",
+        "Dvojník",
+        "Fontána života",
+        "Nekromant",
+        "Ostrov",
+        "Stoletá voda",
+        "Válečná loď"
+      ],
+      "correct": [
+        "Bazilišek",
+        "Bouře",
+        "Dvojník",
+        "Fontána života",
+        "Nekromant",
+        "Ostrov",
+        "Stoletá voda",
+        "Válečná loď"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 476.0,
+      "roundTripMs": 485.2
+    },
+    {
+      "image": "captures/67811bfd14a6dc86d70c1884cda4139b16d1d2bbf202eb3d030c894b8525d03f.jpg",
+      "group": "capture",
+      "expected": [
+        "Elementál země",
+        "Hora",
+        "Les",
+        "Magická hůl",
+        "Pán šelem",
+        "Stoletá voda",
+        "Válečný oř"
+      ],
+      "detected": [
+        "Elementál země",
+        "Hora",
+        "Les",
+        "Magická hůl",
+        "Pán šelem",
+        "Stoletá voda",
+        "Válečný oř"
+      ],
+      "correct": [
+        "Elementál země",
+        "Hora",
+        "Les",
+        "Magická hůl",
+        "Pán šelem",
+        "Stoletá voda",
+        "Válečný oř"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 535.0,
+      "roundTripMs": 544.2
+    },
+    {
+      "image": "captures/e1f5b52cc229a9031057701ca0874064e9a3d0d74ae2eca0d1dfea012877fdbc.jpg",
+      "group": "capture",
+      "expected": [
+        "Elementál země",
+        "Hora",
+        "Les",
+        "Magická hůl",
+        "Pán šelem",
+        "Stoletá voda",
+        "Válečný oř"
+      ],
+      "detected": [
+        "Elementál země",
+        "Hora",
+        "Les",
+        "Magická hůl",
+        "Pán šelem",
+        "Stoletá voda",
+        "Válečný oř"
+      ],
+      "correct": [
+        "Elementál země",
+        "Hora",
+        "Les",
+        "Magická hůl",
+        "Pán šelem",
+        "Stoletá voda",
+        "Válečný oř"
+      ],
+      "falseNegatives": [],
+      "falsePositives": [],
+      "processingMs": 487.0,
+      "roundTripMs": 495.1
+    }
+  ],
+  "missingImages": [],
+  "verification": {
+    "pythonTestsPassed": 44,
+    "idleProbes": [
+      {
+        "id": "67811bfd14a6dc86d70c1884cda4139b16d1d2bbf202eb3d030c894b8525d03f",
+        "status": 200,
+        "cards": 7,
+        "processingMs": 545,
+        "idleSeconds": 13
+      },
+      {
+        "id": "e1f5b52cc229a9031057701ca0874064e9a3d0d74ae2eca0d1dfea012877fdbc",
+        "status": 200,
+        "cards": 7,
+        "processingMs": 499,
+        "idleSeconds": 13
+      }
+    ],
+    "restart": {
+      "archivedImageFiles": 59,
+      "health": {
+        "ok": true,
+        "ocr": "PaddleOCR",
+        "lang": "cs",
+        "ocrVersion": "PP-OCRv5",
+        "detectionModel": "PP-OCRv5_mobile_det",
+        "recognitionModel": "latin_PP-OCRv5_mobile_rec",
+        "detectionMaxSide": 960,
+        "detectionBoxThreshold": 0.5,
+        "titlePrefilter": true,
+        "paddleocrVersion": "3.6.0",
+        "paddlepaddleVersion": "3.2.0",
+        "device": "cpu",
+        "cpuThreads": 2,
+        "rotations": [
+          0.0,
+          -90.0
+        ],
+        "saveCapturedImages": true
+      },
+      "scans": [
+        {
+          "id": "67811bfd14a6dc86d70c1884cda4139b16d1d2bbf202eb3d030c894b8525d03f",
+          "status": 200,
+          "correct": 7,
+          "processingMs": 737
+        },
+        {
+          "id": "e1f5b52cc229a9031057701ca0874064e9a3d0d74ae2eca0d1dfea012877fdbc",
+          "status": 200,
+          "correct": 7,
+          "processingMs": 551
+        }
+      ]
+    }
+  }
+}
