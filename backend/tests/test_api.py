@@ -1,4 +1,6 @@
 from dataclasses import replace
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 import cv2
 import numpy as np
@@ -14,8 +16,10 @@ def client(monkeypatch, tmp_path):
     class FakeOcr:
         def __init__(self, settings, cards_path):
             self.matcher = CardMatcher(cards_path, 78, 92, 7, 58)
+            self.owner_thread = threading.get_native_id()
 
         def scan(self, image, debug):
+            assert threading.get_native_id() == self.owner_thread
             return {"processingMs": 1, "cards": [], "candidates": []}
 
         def save_failed_debug(self, image):
@@ -81,6 +85,40 @@ def test_valid_image_uses_scanner(client):
     response = client.post("/api/v1/scan", content=data.tobytes(), headers={"Content-Type": "image/jpeg"})
     assert response.status_code == 200
     assert response.json()["cards"] == []
+
+
+def test_predictor_stays_on_its_creating_thread_across_requests(client):
+    _, image = cv2.imencode('.jpg', np.full((32,32,3),255,dtype=np.uint8))
+    def send():
+        return client.post('/api/v1/scan',content=image.tobytes(),headers={'Content-Type':'image/jpeg'})
+    for _ in range(3):
+        # Distinct callers and intervening general-pool I/O must never move
+        # the native predictor. FakeOcr asserts affinity on every scan.
+        with ThreadPoolExecutor(max_workers=1) as caller:
+            assert caller.submit(send).result(timeout=3).status_code == 200
+        assert client.get('/card-images/FR99.webp').status_code == 404
+
+
+def test_health_responds_during_inference_and_concurrent_scan_is_rejected(client, monkeypatch):
+    entered, release = threading.Event(), threading.Event()
+    original_scan = main.app.state.ocr.scan
+    def slow_scan(image, debug):
+        entered.set()
+        assert release.wait(timeout=3)
+        return original_scan(image,debug)
+    monkeypatch.setattr(main.app.state.ocr,'scan',slow_scan)
+    _, image = cv2.imencode('.jpg',np.full((32,32,3),255,dtype=np.uint8))
+    def send():
+        return client.post('/api/v1/scan',content=image.tobytes(),headers={'Content-Type':'image/jpeg'})
+    with ThreadPoolExecutor(max_workers=1) as caller:
+        first = caller.submit(send)
+        try:
+            assert entered.wait(timeout=2)
+            assert client.get('/api/v1/health').status_code == 200
+            assert send().status_code == 429
+        finally:
+            release.set()
+        assert first.result(timeout=3).status_code == 200
 
 
 def test_capture_original_and_ocr_input_are_saved_privately(client, monkeypatch, tmp_path):

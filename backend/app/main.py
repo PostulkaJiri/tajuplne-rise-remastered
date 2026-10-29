@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
+from functools import partial
 from importlib.metadata import version
 from pathlib import Path
 from typing import Literal
@@ -24,14 +26,35 @@ CARDS_PATH = BASE_DIR / "cards.json"
 STATIC_DIR = BASE_DIR.parent / "static"
 
 
+async def run_in_ocr_thread(app: FastAPI, function, *args, **kwargs):
+    # Paddle/oneDNN predictors must stay on their creating thread. AnyIO's
+    # general pool retires idle workers and cannot guarantee that affinity.
+    future = asyncio.get_running_loop().run_in_executor(
+        app.state.ocr_executor, partial(function, *args, **kwargs),
+    )
+    try:
+        return await asyncio.shield(future)
+    except asyncio.CancelledError:
+        # Keep scan_lock held until native inference really finishes, even if
+        # the request is cancelled. A stale scan must not queue another frame.
+        await asyncio.shield(future)
+        raise
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     cv2.setNumThreads(settings.cpu_threads)
     app.state.scan_lock = asyncio.Lock()
     app.state.card_art = CardArt(Path(settings.card_art_dir), BASE_DIR / "card_art.json")
     app.state.captures = CaptureStore(Path(settings.capture_dir), settings.save_captured_images, settings.capture_max_bytes)
-    app.state.ocr = OcrService(settings=settings, cards_path=CARDS_PATH)
-    yield
+    app.state.ocr_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="paddle-ocr")
+    try:
+        app.state.ocr = await run_in_ocr_thread(app, OcrService, settings=settings, cards_path=CARDS_PATH)
+        yield
+    finally:
+        # Release the predictor on the same thread before joining its worker.
+        await run_in_ocr_thread(app, setattr, app.state, "ocr", None)
+        app.state.ocr_executor.shutdown(wait=True, cancel_futures=True)
 
 
 app = FastAPI(title="Tajuplné říše OCR API", version="1.0.0", lifespan=lifespan)
@@ -160,7 +183,7 @@ async def scan(request: Request, debug: bool = Query(default=False),
         if image is None:
             raise HTTPException(status_code=400, detail="Image could not be decoded.")
         try:
-            result = await run_in_threadpool(app.state.ocr.scan, image, debug)
+            result = await run_in_ocr_thread(app, app.state.ocr.scan, image, debug)
         except Exception:
             await run_in_threadpool(app.state.captures.save, body, content_type, source,
                                     {"processingMs":0, "cards":[], "candidates":[], "error":"ocr_failed"}, capture_id)
